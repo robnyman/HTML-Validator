@@ -1,0 +1,53 @@
+<html>
+	<script>
+		function validate () {
+			chrome.tabs.getSelected(null, function (tab) {
+				//var url = "http://validator.w3.org/check?uri=" + tab.url + ";output=json",
+				var url = "http://validator.nu/?doc=" + tab.url + "&out=json",
+					xhr = new XMLHttpRequest();
+					
+				xhr.onreadystatechange = function(){
+					
+					if (xhr.readyState === 4) {
+						chrome.tabs.sendRequest(
+							tab.id, 
+							{
+								results: xhr.responseText
+							}
+						);
+					}
+				};
+				
+				xhr.open("GET", url, true);
+				xhr.send(null);
+				
+				//chrome.tabs.create({
+				//	url : "http://validator.w3.org/check?" + xhr.responseText
+				//});
+			});
+		}
+	
+		chrome.browserAction.onClicked.addListener(function (tab) {
+			validate();
+		});
+		
+		chrome.extension.onRequest.addListener(
+			function (request, sender, sendResponse) {
+				if (request.validate) {
+					validate();
+				}
+				else if (request.autoruncheck) {
+					var autorun = localStorage["autorun"];
+					
+					// chrome.tabs.create({
+					// 						url : autorun
+					// 					});
+					
+					if (typeof autorun !== "undefined" && autorun === "true") {
+						validate();
+					}
+				}
+			}
+		);
+	</script>	
+</html>
