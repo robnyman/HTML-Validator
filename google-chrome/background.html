@@ -38,11 +38,6 @@
 				}
 				else if (request.autoruncheck) {
 					var autorun = localStorage["autorun"];
-					
-					// chrome.tabs.create({
-					// 						url : autorun
-					// 					});
-					
 					if (typeof autorun !== "undefined" && autorun === "true") {
 						validate();
 					}
