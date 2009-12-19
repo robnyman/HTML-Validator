@@ -12,7 +12,7 @@ chrome.extension.sendRequest({
 );
 
 document.onkeydown = function (evt) {
-	if (evt.metaKey && evt.shiftKey && evt.keyCode === 86) {
+	if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.keyCode === 86) {
 		validate();
 	}
 };
