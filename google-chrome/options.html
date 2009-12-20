@@ -12,6 +12,7 @@
 		
 		label {
 			font-weight: bold;
+			margin-right: 10px;
 		}
 		
 		h1 {
@@ -24,15 +25,60 @@
 		}
 	</style>
 	<script>
+		var htmlvalidatoroptions = function () {
+			// Base variables
+			var backgroundPage = chrome.extension.getBackgroundPage().htmlvalidatorbackground,
+			 	prefs = backgroundPage.getPrefs(),
+				autorun,
+				validator,
+				item,
+				pref,
+				
+				init = function () {
+					autorun = document.getElementById("autorun");
+					validator = document.getElementsByName("validator");
+					// Getting values from preferences	
+					for (var item in prefs) {
+						pref = prefs[item];
+						if (pref !== "undefined" && pref) {
+							if (item === "validator") {
+								document.getElementById(pref).checked = true;
+							}
+							else {
+								document.getElementById(item).checked = (pref === "true");
+							}
+						}
+					}
+
+					// Event to set preferences instantaneously
+					document.onclick = function () {
+						var validatorValue = "inline",
+							validatorItem;
+						for (var i=0, il=validator.length; i<il; i++) {
+							validatorItem = validator[i];
+							if (validatorItem.checked) {
+								validatorValue = validatorItem.value;
+								break;
+							}
+						};
+
+						//alert(backgroundPage.setPrefs);
+
+						// Save preferences
+						backgroundPage.setPrefs({
+							autorun : autorun.checked,
+							validator : validatorValue
+						});
+					}
+				};
+				
+			return {
+				init : init
+			}	
+		}();
+	
 		window.onload = function () {
-			var autorun = document.getElementById("autorun");
-			if (typeof localStorage["autorun"] !== "undefined") {
-				autorun.checked = (localStorage["autorun"] === "true");
-			}
-			
-			autorun.onclick = function (evt) {
-				localStorage["autorun"] = this.checked;
-			};
+			htmlvalidatoroptions.init();
 		};
 	</script>
 	
@@ -40,10 +86,20 @@
 		
 		<div id="container">
 			<h1>HTML Validator options</h1>
+			<h2>Autorun</h2>
 			<p>
 				<input type="checkbox" id="autorun">
 				<label for="autorun">Autorun</label>
 			</p>
+			
+			<h2>Validation type</h2>
+			<p>
+				<input type="radio" id="inline" name="validator" value="inline">
+				<label for="inline">Inline in page</label>
+				<input type="radio" id="new-tab" name="validator" value="new-tab">
+				<label for="new-tab">New tab with W3C validator</label>
+			</p>
+			
 			<h2>Keyboard shortcuts</h2>
 			<p>
 				<b>Windows/Linux:</b> Press Ctrl + Shift + V to validate a page<br>

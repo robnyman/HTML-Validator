@@ -1,6 +1,6 @@
 {
 	"name": "HTML Validator",
-	"version": "0.9.3",
+	"version": "0.9.4",
 	"description": "Tool to validate HTML of the current web page",
 	"permissions" : [
 		"tabs",

@@ -1,48 +1,123 @@
 <html>
 	<script>
-		function validate () {
-			chrome.tabs.getSelected(null, function (tab) {
-				//var url = "http://validator.w3.org/check?uri=" + tab.url + ";output=json",
-				var url = "http://validator.nu/?doc=" + tab.url + "&out=json",
-					xhr = new XMLHttpRequest();
-					
-				xhr.onreadystatechange = function(){
-					
-					if (xhr.readyState === 4) {
-						chrome.tabs.sendRequest(
-							tab.id, 
-							{
-								results: xhr.responseText
-							}
-						);
-					}
-				};
-				
-				xhr.open("GET", url, true);
-				xhr.send(null);
-				
-				//chrome.tabs.create({
-				//	url : "http://validator.w3.org/check?" + xhr.responseText
-				//});
-			});
-		}
-	
-		chrome.browserAction.onClicked.addListener(function (tab) {
-			validate();
-		});
-		
-		chrome.extension.onRequest.addListener(
-			function (request, sender, sendResponse) {
-				if (request.validate) {
+		var htmlvalidatorbackground = function () {
+			var init = function () {
+				chrome.browserAction.onClicked.addListener(function (tab) {
 					validate();
-				}
-				else if (request.autoruncheck) {
-					var autorun = localStorage["autorun"];
-					if (typeof autorun !== "undefined" && autorun === "true") {
-						validate();
+				});
+
+				chrome.extension.onRequest.addListener(
+					function (request, sender, sendResponse) {
+						if (request.validate) {
+							validate();
+						}
+						else if (request.autoruncheck) {
+							var autorun = getPref ("autorun");
+							if (typeof autorun !== "undefined" && autorun === "true") {
+								validate();
+							}
+						}
 					}
-				}
-			}
-		);
+				);
+			},
+			
+			validate = function () {
+				chrome.tabs.getSelected(null, function (tab) {
+					var validatorType = getPref("validator"),
+						tabUrl = tab.url;
+
+					if (validatorType === "inline") {
+						// To clear possible previous ongoing validation attempts
+						clearTimeout(timer);
+						clearTimeout(loadingTimer);
+
+						/*
+							Commented out URL for possible future use of the W3C API.
+							As of now, though, it doesn't return valid JSON
+						*/
+						//var url = "http://validator.w3.org/check?uri=" + tab.url + ";output=json",
+						var url = "http://validator.nu/?doc=" + tabUrl + "&out=json",
+							xhr = new XMLHttpRequest(),
+							timer,
+							loadingTimer,
+							sendResults = function (result) {
+								clearTimeout(timer);
+								//clearTimeout(loadingTimer);
+								chrome.tabs.sendRequest(
+									tab.id, 
+									{
+										results: result
+									}
+								);
+							};
+
+						sendResults({
+							"message" : "hide-loading"
+						});
+
+						timer = window.setTimeout(function () {
+							xhr.abort();
+							sendResults({
+								"message" : "Validation timed out. Please try again."
+							});
+						}, 2000);
+
+						// If the result is finished, send validation results to the page
+						xhr.onreadystatechange = function () {
+							if (xhr.readyState === 4) {
+								sendResults(xhr.responseText);
+							}
+						};
+
+						xhr.onerror = function () {
+							sendResults({
+								"message" : "Validation failed. Please try again."
+							});
+						};
+
+						// Show validating loading
+						loadingTimer = window.setTimeout(function () {
+							sendResults({
+								"message" : "show-loading"
+							});
+						}, 500);
+
+						// Send validation request to validator.nu
+						xhr.open("GET", url, true);
+						xhr.send(null);
+					}
+					else if (validatorType === "new-tab" && !/validator\.w3\.org/.test(tabUrl)) { // URL check to avoid validating the W3C validator... :-)
+						chrome.tabs.create({
+							url : "http://validator.w3.org/check?uri=" + tabUrl
+						});
+					}
+				});
+			},
+
+			getPref = function (pref) {
+				return localStorage[pref];
+			},
+
+			getPrefs = function () {
+				return {
+					autorun : localStorage["autorun"],
+					validator : localStorage["validator"]
+				};
+			},
+
+			setPrefs = function (prefs) {
+				for (var i in prefs) {
+					localStorage[i] = prefs[i];
+				}	
+			};
+			
+			return {
+				init : init,
+				getPrefs : getPrefs,
+				setPrefs : setPrefs
+			};
+		}();
+		htmlvalidatorbackground.init();
+		console.log(htmlvalidatorbackground.getPrefs)
 	</script>	
 </html>
