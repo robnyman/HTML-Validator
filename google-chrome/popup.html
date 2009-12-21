@@ -1,0 +1,53 @@
+<html>
+<head>
+	<style>
+		#container {
+			width: 170px;
+			margin: 0 auto;
+		}	
+		body {
+			font: 13px Arial, sans-serif;
+		}
+		a {
+			display: block;
+			cursor: pointer;
+		}
+	</style>
+
+	<script>
+		var htmlvalidatorpopup = function () {
+			var backgroundPage = chrome.extension.getBackgroundPage().htmlvalidatorbackground,
+				
+			init = function () {
+				document.getElementById("inline").onclick = function () {
+					backgroundPage.validate("inline");
+				}
+				document.getElementById("new-tab").onclick = function () {
+					backgroundPage.validate("new-tab");
+				}
+			};
+			
+			return {
+				init : init
+			};
+		}();
+		window.onload = function () {
+			htmlvalidatorpopup.init();
+		};
+	</script>
+	
+</head>
+<body>
+	
+	<div id="container">
+		<p>
+			<a id="inline">Validate inline</a>
+		</p>
+		<p>	
+			<a id="new-tab">New tab with W3C validator</a>
+		</p>
+	</div>
+	
+	
+</body>	
+</html>

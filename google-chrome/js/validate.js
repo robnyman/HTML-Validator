@@ -1,5 +1,6 @@
 var htmlvalidator = function () {
 	var hasBeenValidated = false,
+		resultsPresentation,
 	
 	init = function () {
 		chrome.extension.sendRequest({
@@ -13,10 +14,7 @@ var htmlvalidator = function () {
 					validate();
 				}
 				else {
-					hasBeenValidated = false;
-					resultsPresentation.animate({
-						height : 0
-					}, 100);
+					hideResultsPresentation();
 				}
 			}	
 		});
@@ -29,6 +27,15 @@ var htmlvalidator = function () {
 			top : "30%"
 		});
 	},
+	
+	hideResultsPresentation = function () {
+		hasBeenValidated = false;
+		resultsPresentation.slideUp(100, function () {
+			resultsPresentation.css({
+				height : 0
+			})
+		});
+	}
 
 	validate = function () {
 		chrome.extension.sendRequest({
@@ -43,24 +50,23 @@ var htmlvalidator = function () {
 		if (typeof requestResults === "object") {
 			var requestResultsMessage = requestResults.message;
 			if (requestResultsMessage === "show-loading") {
-				//loading.show();
+				loading.show();
 			}
 			else if (requestResultsMessage === "hide-loading") {
-				//loading.hide();
+				loading.hide();
 			}
 			else {
-				//loading.hide();
+				loading.hide();
 				alert(requestResultsMessage);
 			}
 		}
 		else {
-			//loading.hide();
+			loading.hide();
 			hasBeenValidated = true;
 			var results = JSON.parse(requestResults),
 				messages = results.messages,
 				url = results.url,
 				errors = [],
-				resultsPresentation = $("#html-validation-results"),
 				resultsPresentationContent,
 				message,
 				error,
@@ -82,6 +88,7 @@ var htmlvalidator = function () {
 			errorLength = errors.length;
 			hasErrors = errorLength > 0;
 
+			resultsPresentation = $("#html-validation-results");
 			if (resultsPresentation.length === 0) {
 				resultsPresentation = $('<div id="html-validation-results" />');
 				$(document.body).append(resultsPresentation);
@@ -106,9 +113,7 @@ var htmlvalidator = function () {
 			}, 100);
 
 			$("#html-validation-close").click(function () {
-				resultsPresentation.animate({
-					height : 0
-				}, 100);
+				hideResultsPresentation();
 			});
 		}
 	};

@@ -12,7 +12,7 @@
 							validate();
 						}
 						else if (request.autoruncheck) {
-							var autorun = getPref ("autorun");
+							var autorun = getPref("autorun");
 							if (typeof autorun !== "undefined" && autorun === "true") {
 								validate();
 							}
@@ -21,12 +21,14 @@
 				);
 			},
 			
-			validate = function () {
+			validate = function (validation) {
 				chrome.tabs.getSelected(null, function (tab) {
-					var validatorType = getPref("validator"),
+					var validatorType = validation || getPref("validator"),
+						autorun = getPref("autorun"),
 						tabUrl = tab.url;
 
-					if (validatorType === "inline") {
+					if (validatorType === "inline" && (!/validator\.nu/.test(tabUrl) && autorun)) { // To avoid inline validation of the Validator.nu validator
+						
 						// To clear possible previous ongoing validation attempts
 						clearTimeout(timer);
 						clearTimeout(loadingTimer);
@@ -41,8 +43,7 @@
 							timer,
 							loadingTimer,
 							sendResults = function (result) {
-								clearTimeout(timer);
-								//clearTimeout(loadingTimer);
+								clearTimeout(loadingTimer);
 								chrome.tabs.sendRequest(
 									tab.id, 
 									{
@@ -50,7 +51,8 @@
 									}
 								);
 							};
-
+						
+						// Hides any possible validating loading indicator	
 						sendResults({
 							"message" : "hide-loading"
 						});
@@ -65,11 +67,13 @@
 						// If the result is finished, send validation results to the page
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4) {
+								clearTimeout(timer);
 								sendResults(xhr.responseText);
 							}
 						};
 
 						xhr.onerror = function () {
+							clearTimeout(timer);
 							sendResults({
 								"message" : "Validation failed. Please try again."
 							});
@@ -80,13 +84,13 @@
 							sendResults({
 								"message" : "show-loading"
 							});
-						}, 500);
+						}, 200);
 
 						// Send validation request to validator.nu
 						xhr.open("GET", url, true);
 						xhr.send(null);
 					}
-					else if (validatorType === "new-tab" && !/validator\.w3\.org/.test(tabUrl)) { // URL check to avoid validating the W3C validator... :-)
+					else if (validatorType === "new-tab" && !/validator\.w3\.org/.test(tabUrl)) { // URL check to avoid validating the W3C or Validator.nu validator... :-)
 						chrome.tabs.create({
 							url : "http://validator.w3.org/check?uri=" + tabUrl
 						});
@@ -101,7 +105,8 @@
 			getPrefs = function () {
 				return {
 					autorun : localStorage["autorun"],
-					validator : localStorage["validator"]
+					validator : localStorage["validator"],
+					popup : localStorage["popup"]
 				};
 			},
 
@@ -113,11 +118,11 @@
 			
 			return {
 				init : init,
+				validate : validate,
 				getPrefs : getPrefs,
 				setPrefs : setPrefs
 			};
 		}();
 		htmlvalidatorbackground.init();
-		console.log(htmlvalidatorbackground.getPrefs)
 	</script>	
 </html>

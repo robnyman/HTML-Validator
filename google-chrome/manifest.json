@@ -1,25 +1,26 @@
 {
-	"name": "HTML Validator",
-	"version": "0.9.4",
-	"description": "Tool to validate HTML of the current web page",
+	"name" : "HTML Validator",
+	"version" : "0.9.4",
+	"description" : "Tool to validate HTML of the current web page",
 	"permissions" : [
 		"tabs",
 		"http://validator.w3.org/*",
 		"http://validator.nu/*"
 	],
 	"browser_action": {
-		"default_icon": "images/icon-16.png",
-		"default_title" : "Validate this page"
+		"default_icon" : "images/icon-16.png",
+		"default_title" : "Validate this page",
+		"popup" : "popup.html"
 	},
 	"icons": {
-		"16": "images/icon-16.png",
-		"32": "images/icon-32.png",
-		"64": "images/icon-64.png",
-		"128": "images/icon-128.png"
+		"16" : "images/icon-16.png",
+		"32" : "images/icon-32.png",
+		"64" : "images/icon-64.png",
+		"128" : "images/icon-128.png"
 	},
 	"background_page" : "background.html",
 	"options_page" : "options.html",
-	"content_scripts": [
+	"content_scripts" : [
 		{
 			"matches" : ["http://*/*"],
 			"css" : ["css/validation.css"],

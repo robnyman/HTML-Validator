@@ -11,6 +11,7 @@
 	padding: 10px;
 	margin: 0 auto;
 	display: none;
+	font-family: 14px "Gill Sans", Trebuchet, Calibri, sans-serif;
 	-webkit-border-radius : 10px;
 	border-radius : 10px;
 }
@@ -27,7 +28,7 @@
 	bottom: 0;
 	width: 100%;
 	height: 0;
-	font: 12px Helvetica, Verdana, Arial, sans-serif;
+	font-family: 12px "Gill Sans", Trebuchet, Calibri, sans-serif;
 	color: #333 !important;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#111));
 	text-align: left;
@@ -37,10 +38,12 @@
 	border-top: 2px solid #ccc;
 	margin: 0;
 	overflow: hidden;
+	-webkit-box-shadow: inset 0 3px 5px #ccc;
 }
 
 #html-validation-results h1 {
-	font-size: 16px;
+	font-family: 16px "Gill Sans", Trebuchet, Calibri, sans-serif !important;
+	text-transform: uppercase;
 	border-bottom: 1px solid #ccc;
 	margin: 0;
 	padding: 0 10px 5px;
@@ -63,9 +66,7 @@
 	background: #d23d24;
 	-webkit-border-radius : 5px;
 	border-radius : 5px;
-	
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#d23d24), color-stop(0.5, #d23d24));
-	
 	border: 1px solid #000;
 	margin: -3px 15px 0 0;
 	padding-top: 3px;
@@ -76,12 +77,12 @@
 	height: 180px;
 	overflow: auto;
 	margin: 0 10px 10px;
-	padding: 0 10px 10px;
+	padding: 10px;
 }
 
 .html-validation-error {
 	background: #eee;
-	border: 1px solid #ccc;
+	border: 1px solid #bbb;
 	border-top-width: 0;
 	padding: 10px;
 }
@@ -90,6 +91,13 @@
 	background: #ccc;
 }
 
-.html-validation-error:last-child {
-	margin-bottom: 100px;
+#html-validation-source {
+	font-style: italic;
+	color: #55b05a;
+	background: #eee;
+	border: 1px solid #bbb;
+	-webkit-border-radius : 5px;
+	border-radius : 5px;
+	margin: 100px 0 20px;
+	padding: 5px 10px;
 }
