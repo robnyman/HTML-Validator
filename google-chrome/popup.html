@@ -10,7 +10,12 @@
 		}
 		a {
 			display: block;
-			cursor: pointer;
+			color: #333;
+			text-decoration: none;
+			padding: 5px;
+		}
+		a:hover {
+			background: #ccc;
 		}
 	</style>
 
@@ -19,16 +24,23 @@
 			var backgroundPage = chrome.extension.getBackgroundPage().htmlvalidatorbackground,
 				
 			init = function () {
+				backgroundPage.checkPopupPref(htmlvalidatorpopup.close);
+				
 				document.getElementById("inline").onclick = function () {
 					backgroundPage.validate("inline");
 				}
 				document.getElementById("new-tab").onclick = function () {
 					backgroundPage.validate("new-tab");
 				}
+			},
+			
+			close = function () {
+				window.close();
 			};
 			
 			return {
-				init : init
+				init : init,
+				close : close
 			};
 		}();
 		window.onload = function () {
@@ -40,12 +52,8 @@
 <body>
 	
 	<div id="container">
-		<p>
-			<a id="inline">Validate inline</a>
-		</p>
-		<p>	
-			<a id="new-tab">New tab with W3C validator</a>
-		</p>
+		<a href="#" id="inline">Validate inline</a>
+		<a href="#" id="new-tab">New tab with W3C validator</a>
 	</div>
 	
 	

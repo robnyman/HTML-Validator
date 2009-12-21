@@ -32,6 +32,11 @@
 				autorun,
 				validator,
 				popup,
+				defaults = {
+					autorun : "false",
+					validator : "inline",
+					popup : "popup"
+				},
 				item,
 				pref,
 				
@@ -39,16 +44,19 @@
 					autorun = document.getElementById("autorun");
 					validator = document.getElementsByName("validator");
 					popup = document.getElementsByName("popup");
+					
 					// Getting values from preferences	
 					for (var item in prefs) {
 						pref = prefs[item];
-						if (pref !== "undefined" && pref) {
-							if (item === "validator" || item === "popup") {
-								document.getElementById(pref).checked = true;
-							}
-							else {
-								document.getElementById(item).checked = (pref === "true");
-							}
+						if (typeof pref === "undefined") {
+							pref = defaults[item];
+							backgroundPage.setPref(item, pref);
+						}
+						if (item === "validator" || item === "popup") {
+							document.getElementById(pref).checked = true;
+						}
+						else {
+							document.getElementById(item).checked = (pref === "true");
 						}
 					}
 
@@ -73,7 +81,7 @@
 								break;
 							}
 						};
-						
+												
 						// Save preferences
 						backgroundPage.setPrefs({
 							autorun : autorun.checked,
@@ -111,12 +119,12 @@
 				<label for="new-tab">New tab with W3C validator</label>
 			</p>
 			
-			<h2>Use Popup With Choices</h2>
+			<h2>Show menu at icon-click</h2>
 			<p>
 				<input type="radio" id="popup" name="popup" value="popup">
-				<label for="popup">Use Popup</label>
+				<label for="popup">Yes</label>
 				<input type="radio" id="no-popup" name="popup" value="no-popup">
-				<label for="no-popup">No Popup (validates from your Validation Type setting)</label>
+				<label for="no-popup">No (will instead validate according to Validation Type)</label>
 			</p>
 			
 			<h2>Keyboard shortcuts</h2>

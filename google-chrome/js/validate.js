@@ -1,6 +1,7 @@
 var htmlvalidator = function () {
 	var hasBeenValidated = false,
 		resultsPresentation,
+		body = $(document.body),
 	
 	init = function () {
 		chrome.extension.sendRequest({
@@ -21,7 +22,7 @@ var htmlvalidator = function () {
 			
 		chrome.extension.onRequest.addListener(receiveRequest);
 		
-		loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(document.body);
+		loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(body);
 		loading.css({
 			left : ($(document).width() / 2) - (loading.width() / 2),
 			top : "30%"
@@ -91,7 +92,7 @@ var htmlvalidator = function () {
 			resultsPresentation = $("#html-validation-results");
 			if (resultsPresentation.length === 0) {
 				resultsPresentation = $('<div id="html-validation-results" />');
-				$(document.body).append(resultsPresentation);
+				body.append(resultsPresentation);
 			}
 
 			resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + errorLength + ' errors</span>') + '</h1>';

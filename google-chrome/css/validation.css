@@ -11,7 +11,7 @@
 	padding: 10px;
 	margin: 0 auto;
 	display: none;
-	font-family: 14px "Gill Sans", Trebuchet, Calibri, sans-serif;
+	font: 14px Helvetica, Verdana, sans-serif !important;
 	-webkit-border-radius : 10px;
 	border-radius : 10px;
 }
@@ -28,7 +28,7 @@
 	bottom: 0;
 	width: 100%;
 	height: 0;
-	font-family: 12px "Gill Sans", Trebuchet, Calibri, sans-serif;
+	font: 12px Helvetica, Verdana, sans-serif !important;
 	color: #333 !important;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#111));
 	text-align: left;
@@ -42,7 +42,7 @@
 }
 
 #html-validation-results h1 {
-	font-family: 16px "Gill Sans", Trebuchet, Calibri, sans-serif !important;
+	font: 16px "Gill Sans", Trebuchet, Calibri, sans-serif !important;
 	text-transform: uppercase;
 	border-bottom: 1px solid #ccc;
 	margin: 0;
@@ -61,6 +61,7 @@
 	float: right;
 	width: 16px;
 	height: 16px;
+	font-weight: bold;
 	text-align: center;
 	color: #fff;
 	background: #d23d24;

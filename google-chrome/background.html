@@ -12,7 +12,7 @@
 							validate();
 						}
 						else if (request.autoruncheck) {
-							var autorun = getPref("autorun");
+							var autorun = getPref("autorun") || "false";
 							if (typeof autorun !== "undefined" && autorun === "true") {
 								validate();
 							}
@@ -23,8 +23,8 @@
 			
 			validate = function (validation) {
 				chrome.tabs.getSelected(null, function (tab) {
-					var validatorType = validation || getPref("validator"),
-						autorun = getPref("autorun"),
+					var validatorType = validation || getPref("validator") || "inline",
+						autorun = getPref("autorun") || "false",
 						tabUrl = tab.url;
 
 					if (validatorType === "inline" && (!/validator\.nu/.test(tabUrl) && autorun)) { // To avoid inline validation of the Validator.nu validator
@@ -109,18 +109,32 @@
 					popup : localStorage["popup"]
 				};
 			},
+			
+			setPref = function (pref, value) {
+				return localStorage[pref] = value;
+			},
 
 			setPrefs = function (prefs) {
 				for (var i in prefs) {
 					localStorage[i] = prefs[i];
 				}	
+			},
+			
+			checkPopupPref = function (popupMethod) {
+				usePopUpMenu = getPref("popup") || "true";
+				if (usePopUpMenu === "no-popup") {
+					validate();
+					popupMethod();
+				}
 			};
 			
 			return {
 				init : init,
 				validate : validate,
 				getPrefs : getPrefs,
-				setPrefs : setPrefs
+				setPref : setPref,
+				setPrefs : setPrefs,
+				checkPopupPref : checkPopupPref
 			};
 		}();
 		htmlvalidatorbackground.init();
