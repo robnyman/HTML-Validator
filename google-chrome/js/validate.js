@@ -4,6 +4,7 @@ var htmlvalidator = function () {
 		resultsPresentation,
 		loading,
 		messagePresentation,
+		messagePresentationContent,
 	
 	init = function () {
 		chrome.extension.sendRequest({
@@ -36,10 +37,14 @@ var htmlvalidator = function () {
 			top : "30%"
 		});
 		
-		messagePresentation = $('<div id="html-validator-message" />').appendTo(body);
+		messagePresentation = $('<div id="html-validator-message"><span id="html-validation-message-close">X</span><div id="html-validator-message-content"></div></div>').appendTo(body);
 		messagePresentation.css({
 			left : ($(document).width() / 2) - (messagePresentation.width() / 2),
 			top : "30%"
+		});
+		messagePresentationContent = $("#html-validator-message-content");
+		$("#html-validation-message-close").click(function () {
+			messagePresentation.fadeOut("fast");
 		});
 	},
 	
@@ -53,7 +58,7 @@ var htmlvalidator = function () {
 	},
 	
 	showMessage = function (message) {
-		messagePresentation[0].innerHTML = message;
+		messagePresentationContent[0].innerHTML = message;
 		messagePresentation.fadeIn("fast");
 	},
 
