@@ -24,82 +24,7 @@
 			margin: 30px 0 0;
 		}
 	</style>
-	<script>
-		var htmlvalidatoroptions = function () {
-			// Base variables
-			var backgroundPage = chrome.extension.getBackgroundPage().htmlvalidatorbackground,
-			 	prefs = backgroundPage.getPrefs(),
-				autorun,
-				validator,
-				popup,
-				defaults = {
-					autorun : "false",
-					validator : "inline",
-					popup : "popup"
-				},
-				item,
-				pref,
-				
-				init = function () {
-					autorun = document.getElementById("autorun");
-					validator = document.getElementsByName("validator");
-					popup = document.getElementsByName("popup");
-					
-					// Getting values from preferences	
-					for (var item in prefs) {
-						pref = prefs[item];
-						if (typeof pref === "undefined") {
-							pref = defaults[item];
-							backgroundPage.setPref(item, pref);
-						}
-						if (item === "validator" || item === "popup") {
-							document.getElementById(pref).checked = true;
-						}
-						else {
-							document.getElementById(item).checked = (pref === "true");
-						}
-					}
-
-					// Event to set preferences instantaneously
-					document.onclick = function () {
-						var validatorValue = "inline",
-							validatorItem,
-							popupValue = "popup",
-							popupItem;
-						for (var i=0, il=validator.length; i<il; i++) {
-							validatorItem = validator[i];
-							if (validatorItem.checked) {
-								validatorValue = validatorItem.value;
-								break;
-							}
-						};
-						
-						for (var j=0, jl=popup.length; j<jl; j++) {
-							popupItem = popup[j];
-							if (popupItem.checked) {
-								popupValue = popupItem.value;
-								break;
-							}
-						};
-												
-						// Save preferences
-						backgroundPage.setPrefs({
-							autorun : autorun.checked,
-							validator : validatorValue,
-							popup : popupValue
-						});
-					}
-				};
-				
-			return {
-				init : init
-			}	
-		}();
-	
-		window.onload = function () {
-			htmlvalidatoroptions.init();
-		};
-	</script>
+	<script src="js/options.js"></script>
 	
 	<body>
 		
@@ -119,12 +44,20 @@
 				<label for="new-tab">New tab with W3C validator</label>
 			</p>
 			
-			<h2>Show menu at icon-click</h2>
+			<h2>Show error list</h2>
 			<p>
-				<input type="radio" id="popup" name="popup" value="popup">
-				<label for="popup">Yes</label>
-				<input type="radio" id="no-popup" name="popup" value="no-popup">
-				<label for="no-popup">No (will instead validate according to Validation Type)</label>
+				<input type="radio" id="showerrorlist" name="errorlist" value="showerrorlist">
+				<label for="showerrorlist">Yes</label>
+				<input type="radio" id="noerrorlist" name="errorlist" value="noerrorlist">
+				<label for="noerrorlist">No</label>
+			</p>
+			
+			<h2>Validate at icon-click</h2>
+			<p>
+				<input type="radio" id="iconvalidate" name="iconclick" value="iconvalidate">
+				<label for="iconvalidate">Yes</label>
+				<input type="radio" id="icondontvalidate" name="iconclick" value="icondontvalidate">
+				<label for="icondontvalidate">No</label>
 			</p>
 			
 			<h2>Keyboard shortcuts</h2>

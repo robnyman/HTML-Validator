@@ -2,7 +2,7 @@
 <head>
 	<style>
 		#container {
-			width: 170px;
+			width: 120px;
 			margin: 0 auto;
 		}	
 		body {
@@ -15,22 +15,42 @@
 			padding: 5px;
 		}
 		a:hover {
-			background: #ccc;
+			background: #eee;
+		}
+		label {
+			margin-right: 10px;
+		}
+		h1 {
+			font-size: 14px;
+			border-top: 1px solid #ccc;
+			margin: 10px 0 10px;
+			padding-top: 15px;
+		}
+		
+		h2 {
+			font-size: 12px;
+			margin: 12px 0 0;
+		}
+		p {
+			margin-top: 5px;
 		}
 	</style>
 
+	<script src="js/options.js"></script>
 	<script>
 		var htmlvalidatorpopup = function () {
 			var backgroundPage = chrome.extension.getBackgroundPage().htmlvalidatorbackground,
 				
 			init = function () {
-				backgroundPage.checkPopupPref(htmlvalidatorpopup.close);
-				
-				document.getElementById("inline").onclick = function () {
+				document.getElementById("inline-validation").onclick = function () {
 					backgroundPage.validate("inline");
 				}
-				document.getElementById("new-tab").onclick = function () {
+				document.getElementById("new-tab-validation").onclick = function () {
 					backgroundPage.validate("new-tab");
+				}
+				
+				if (backgroundPage.getPref("iconclick") === "iconvalidate") {
+					backgroundPage.validate();
 				}
 			},
 			
@@ -39,12 +59,14 @@
 			};
 			
 			return {
-				init : init,
-				close : close
+				init : init
 			};
 		}();
 		window.onload = function () {
 			htmlvalidatorpopup.init();
+			if (typeof htmlvalidatoroptions !== "undefined") {
+				htmlvalidatoroptions.init();
+			}
 		};
 	</script>
 	
@@ -52,9 +74,42 @@
 <body>
 	
 	<div id="container">
-		<a href="#" id="inline">Validate inline</a>
-		<a href="#" id="new-tab">New tab with W3C validator</a>
+		<a href="#" id="inline-validation">Validate inline</a>
+		<a href="#" id="new-tab-validation">W3C validator</a>
+		
+		<h1>Options</h1>
+		<h2>Autorun</h2>
+		<p>
+			<input type="checkbox" id="autorun">
+			<label for="autorun">Autorun</label>
+		</p>
+		
+		<h2>Validation Type</h2>
+		<p>
+			<input type="radio" id="inline" name="validator" value="inline">
+			<label for="inline">Inline in page</label><br>
+			<input type="radio" id="new-tab" name="validator" value="new-tab">
+			<label for="new-tab">W3C validator</label>
+		</p>
+		
+		<h2>Show error list</h2>
+		<p>
+			<input type="radio" id="showerrorlist" name="errorlist" value="showerrorlist">
+			<label for="showerrorlist">Yes</label>
+			<input type="radio" id="noerrorlist" name="errorlist" value="noerrorlist">
+			<label for="noerrorlist">No</label>
+		</p>
+		
+		<h2>Validate at icon-click</h2>
+		<p>
+			<input type="radio" id="iconvalidate" name="iconclick" value="iconvalidate">
+			<label for="iconvalidate">Yes</label>
+			<input type="radio" id="icondontvalidate" name="iconclick" value="icondontvalidate">
+			<label for="icondontvalidate">No</label>
+		</p>
 	</div>
+	
+		
 	
 	
 </body>	

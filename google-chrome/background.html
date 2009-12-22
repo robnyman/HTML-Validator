@@ -5,14 +5,17 @@
 				chrome.browserAction.onClicked.addListener(function (tab) {
 					validate();
 				});
-
+				
 				chrome.extension.onRequest.addListener(
 					function (request, sender, sendResponse) {
 						if (request.validate) {
 							validate();
 						}
+						else if (request.setBadgeValues) {
+							formatBadge(request.errors);
+						}
 						else if (request.autoruncheck) {
-							var autorun = getPref("autorun") || "false";
+							var autorun = getPref("autorun") || "true";
 							if (typeof autorun !== "undefined" && autorun === "true") {
 								validate();
 							}
@@ -21,13 +24,28 @@
 				);
 			},
 			
+			formatBadge = function (errors) {
+				chrome.tabs.getSelected(null, function (tab) {
+					var tabId = tab.id;
+					chrome.browserAction.setBadgeText({
+						text : errors.toString(),
+						tabId : tabId
+					});
+
+					chrome.browserAction.setBadgeBackgroundColor({
+						color : (errors > 0)? [210, 61, 36, 255] : [85, 176, 90, 255],
+						tabId : tabId
+					});
+				});
+			},
+			
 			validate = function (validation) {
 				chrome.tabs.getSelected(null, function (tab) {
 					var validatorType = validation || getPref("validator") || "inline",
-						autorun = getPref("autorun") || "false",
+						autorun = getPref("autorun") || "true",
 						tabUrl = tab.url;
 
-					if (validatorType === "inline" && (!/validator\.nu/.test(tabUrl) && autorun)) { // To avoid inline validation of the Validator.nu validator
+					if (validatorType === "inline" && (!/(validator\.nu|validator\.w3\.org)/.test(tabUrl) && autorun)) { // To avoid inline validation of the Validator.nu and W3C validator
 						
 						// To clear possible previous ongoing validation attempts
 						clearTimeout(timer);
@@ -47,7 +65,8 @@
 								chrome.tabs.sendRequest(
 									tab.id, 
 									{
-										results: result
+										results : result,
+										showErrorList : getPref("errorlist") || "showerrorlist"
 									}
 								);
 							};
@@ -106,7 +125,8 @@
 				return {
 					autorun : localStorage["autorun"],
 					validator : localStorage["validator"],
-					popup : localStorage["popup"]
+					errorlist : localStorage["errorlist"],
+					iconclick : localStorage["iconclick"]
 				};
 			},
 			
@@ -118,25 +138,17 @@
 				for (var i in prefs) {
 					localStorage[i] = prefs[i];
 				}	
-			},
-			
-			checkPopupPref = function (popupMethod) {
-				usePopUpMenu = getPref("popup") || "true";
-				if (usePopUpMenu === "no-popup") {
-					validate();
-					popupMethod();
-				}
 			};
 			
 			return {
 				init : init,
 				validate : validate,
+				getPref : getPref,
 				getPrefs : getPrefs,
 				setPref : setPref,
-				setPrefs : setPrefs,
-				checkPopupPref : checkPopupPref
+				setPrefs : setPrefs
 			};
 		}();
 		htmlvalidatorbackground.init();
-	</script>	
+	</script>
 </html>

@@ -5,6 +5,12 @@ var htmlvalidator = function () {
 	
 	init = function () {
 		chrome.extension.sendRequest({
+				setBadgeValues : true,
+				errors : ""
+			}
+		);
+		
+		chrome.extension.sendRequest({
 				autoruncheck : true
 			}
 		);
@@ -66,13 +72,13 @@ var htmlvalidator = function () {
 			hasBeenValidated = true;
 			var results = JSON.parse(requestResults),
 				messages = results.messages,
+				showErrorList = request.showErrorList,
 				url = results.url,
 				errors = [],
 				resultsPresentationContent,
 				message,
 				error,
 				errorLength,
-				hasErrors,
 				validationInfoLink;
 
 			for (var i=0, il=messages.length; i<il; i++) {
@@ -87,35 +93,41 @@ var htmlvalidator = function () {
 			}
 
 			errorLength = errors.length;
-			hasErrors = errorLength > 0;
+			chrome.extension.sendRequest({
+					setBadgeValues : true,
+					errors : errorLength
+				}
+			);
+			
+			if (showErrorList === "showerrorlist") {
+				resultsPresentation = $("#html-validation-results");
+				if (resultsPresentation.length === 0) {
+					resultsPresentation = $('<div id="html-validation-results" />');
+					body.append(resultsPresentation);
+				}
 
-			resultsPresentation = $("#html-validation-results");
-			if (resultsPresentation.length === 0) {
-				resultsPresentation = $('<div id="html-validation-results" />');
-				body.append(resultsPresentation);
+				resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + errorLength + ' errors</span>') + '</h1>';
+				resultsPresentationContent = $('<div id="html-validation-results-content" />').appendTo(resultsPresentation);
+				resultsPresentationContent[0].innerHTML = '';
+
+				for (var j=0, jl=errorLength; j<jl; j++) {
+					error = errors[j];
+					resultsPresentationContent.append($('<div class="html-validation-error">Line ' + error.line
+					 	+ ', column ' + error.column + ': '
+					 	+ '<b>' + error.message + '</b>'
+					 + ' </div>'));
+				}
+
+				validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.nu/?doc=' + url + '" title="Validate this URL at the Validator.nu web site" target="_blank">Validator.nu</a></div>').appendTo(resultsPresentationContent);
+
+				resultsPresentation.animate({
+					height : 200
+				}, 100);
+
+				$("#html-validation-close").click(function () {
+					hideResultsPresentation();
+				});
 			}
-
-			resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + errorLength + ' errors</span>') + '</h1>';
-			resultsPresentationContent = $('<div id="html-validation-results-content" />').appendTo(resultsPresentation);
-			resultsPresentationContent[0].innerHTML = '';
-
-			for (var j=0, jl=errorLength; j<jl; j++) {
-				error = errors[j];
-				resultsPresentationContent.append($('<div class="html-validation-error">Line ' + error.line
-				 	+ ', column ' + error.column + ': '
-				 	+ '<b>' + error.message + '</b>'
-				 + ' </div>'));
-			}
-
-			validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.nu/?doc=' + url + '" title="Validate this URL at the Validator.nu web site" target="_blank">Validator.nu</a></div>').appendTo(resultsPresentationContent);
-
-			resultsPresentation.animate({
-				height : 200
-			}, 100);
-
-			$("#html-validation-close").click(function () {
-				hideResultsPresentation();
-			});
 		}
 	};
 	
