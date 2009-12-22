@@ -2,7 +2,7 @@
 <head>
 	<style>
 		#container {
-			width: 120px;
+			width: 130px;
 			margin: 0 auto;
 		}	
 		body {
@@ -34,6 +34,9 @@
 		p {
 			margin-top: 5px;
 		}
+		input {
+			margin-bottom: 5px;
+		}
 	</style>
 
 	<script src="js/options.js"></script>
@@ -52,10 +55,17 @@
 				if (backgroundPage.getPref("iconclick") === "iconvalidate") {
 					backgroundPage.validate();
 				}
+				
+				document.getElementById("showerrorlist").onclick = reloadTab;
+				document.getElementById("noerrorlist").onclick = reloadTab;
 			},
 			
-			close = function () {
-				window.close();
+			reloadTab = function () {
+				chrome.tabs.getSelected(null, function (tab) {
+					chrome.tabs.update(tab.id, {
+						url : tab.url
+					});
+				});
 			};
 			
 			return {
@@ -106,6 +116,14 @@
 			<label for="iconvalidate">Yes</label>
 			<input type="radio" id="icondontvalidate" name="iconclick" value="icondontvalidate">
 			<label for="icondontvalidate">No</label>
+		</p>
+		
+		<h2>For inline validation</h2>
+		<p>
+			<input type="checkbox" id="usetimeout">
+			<label for="usetimeout">Use timeout</label><br>
+			<input type="checkbox" id="loadingindicator">
+			<label for="loadingindicator">Loading indicator</label>
 		</p>
 	</div>
 	

@@ -1,7 +1,9 @@
 var htmlvalidator = function () {
 	var hasBeenValidated = false,
-		resultsPresentation,
 		body = $(document.body),
+		resultsPresentation,
+		loading,
+		messagePresentation,
 	
 	init = function () {
 		chrome.extension.sendRequest({
@@ -33,6 +35,12 @@ var htmlvalidator = function () {
 			left : ($(document).width() / 2) - (loading.width() / 2),
 			top : "30%"
 		});
+		
+		messagePresentation = $('<div id="html-validator-message" />').appendTo(body);
+		messagePresentation.css({
+			left : ($(document).width() / 2) - (messagePresentation.width() / 2),
+			top : "30%"
+		});
 	},
 	
 	hideResultsPresentation = function () {
@@ -40,14 +48,20 @@ var htmlvalidator = function () {
 		resultsPresentation.slideUp(100, function () {
 			resultsPresentation.css({
 				height : 0
-			})
+			});
 		});
-	}
+	},
+	
+	showMessage = function (message) {
+		messagePresentation[0].innerHTML = message;
+		messagePresentation.fadeIn("fast");
+	},
 
-	validate = function () {
+	validate = function (validation) {
 		chrome.extension.sendRequest({
 				//html : document.documentElement.firstChild.nodeValue.replace(/[\n\r\t]/g, "")
-				validate : true
+				validate : true,
+				validation : validation || "inline"
 			}
 		);
 	},
@@ -64,22 +78,27 @@ var htmlvalidator = function () {
 			}
 			else {
 				loading.hide();
-				alert(requestResultsMessage);
+				showMessage(requestResultsMessage);
 			}
 		}
 		else {
 			loading.hide();
 			hasBeenValidated = true;
-			var results = JSON.parse(requestResults),
-				messages = results.messages,
-				showErrorList = request.showErrorList,
-				url = results.url,
-				errors = [],
-				resultsPresentationContent,
-				message,
-				error,
-				errorLength,
-				validationInfoLink;
+			try {
+				var results = JSON.parse(requestResults),
+					messages = results.messages,
+					showErrorList = request.showErrorList,
+					url = results.url,
+					errors = [],
+					resultsPresentationContent,
+					message,
+					error,
+					errorLength,
+					validationInfoLink;
+				}
+				catch (e) {
+					showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
+				}	
 
 			for (var i=0, il=messages.length; i<il; i++) {
 				message = messages[i];
@@ -88,7 +107,7 @@ var htmlvalidator = function () {
 						"line" : message.lastLine,
 						"column" : message.lastColumn,
 						"message" : message.message
-					})
+					});
 				}
 			}
 
@@ -136,3 +155,6 @@ var htmlvalidator = function () {
 	};
 }();
 htmlvalidator.init();
+
+
+window.htmlvalidator = htmlvalidator;

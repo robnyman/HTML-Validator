@@ -10,7 +10,9 @@ var htmlvalidatoroptions = function () {
 			autorun : "true",
 			validator : "inline",
 			errorlist : "showerrorlist",
-			iconclick : "icondontvalidate"
+			iconclick : "icondontvalidate",
+			usetimeout : "true",
+			loadingindicator : "true"
 		},
 		item,
 		pref,
@@ -20,6 +22,8 @@ var htmlvalidatoroptions = function () {
 			validator = document.getElementsByName("validator");
 			errorlist = document.getElementsByName("errorlist");
 			iconclick = document.getElementsByName("iconclick");
+			usetimeout = document.getElementById("usetimeout");
+			loadingindicator = document.getElementById("loadingindicator");
 			
 			// Getting values from preferences	
 			for (var item in prefs) {
@@ -73,7 +77,9 @@ var htmlvalidatoroptions = function () {
 					autorun : autorun.checked,
 					validator : validatorValue,
 					errorlist : errorlistValue,
-					iconclick : iconclickValue
+					iconclick : iconclickValue,
+					usetimeout : usetimeout.checked,
+					loadingindicator : loadingindicator.checked
 				});
 			}
 		};
