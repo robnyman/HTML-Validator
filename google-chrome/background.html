@@ -124,6 +124,27 @@
 					}
 				});
 			},
+			
+			createErrorList = function () {
+				sendMessage("create-error-list");
+			},
+			
+			hideResultsPresentation = function () {
+				sendMessage("hide-error-list");
+			},
+			
+			sendMessage = function (message) {
+				chrome.tabs.getSelected(null, function (tab) {
+					chrome.tabs.sendRequest(
+						tab.id, 
+						{
+							results : {
+								"message" : message
+							}
+						}
+					);
+				});
+			}
 
 			getPref = function (pref) {
 				return localStorage[pref];
@@ -153,6 +174,8 @@
 			return {
 				init : init,
 				validate : validate,
+				createErrorList : createErrorList,
+				hideResultsPresentation : hideResultsPresentation,
 				getPref : getPref,
 				getPrefs : getPrefs,
 				setPref : setPref,

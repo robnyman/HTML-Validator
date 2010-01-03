@@ -56,8 +56,16 @@
 					backgroundPage.validate();
 				}
 				
+				if (backgroundPage.getPref("errorlist") === "showerrorlistatclick") {
+					backgroundPage.createErrorList();
+				}
+				
 				document.getElementById("showerrorlist").onclick = reloadTab;
 				document.getElementById("noerrorlist").onclick = reloadTab;
+			},
+			
+			hideResultsPresentation = function () {
+				backgroundPage.hideResultsPresentation();
 			},
 			
 			reloadTab = function () {
@@ -69,13 +77,20 @@
 			};
 			
 			return {
-				init : init
+				init : init,
+				hideResultsPresentation : hideResultsPresentation
 			};
 		}();
 		window.onload = function () {
 			htmlvalidatorpopup.init();
 			if (typeof htmlvalidatoroptions !== "undefined") {
 				htmlvalidatoroptions.init();
+			}	
+		};
+		
+		document.onkeydown = function (evt) {
+			if (evt.keyCode === 27) {
+				htmlvalidatorpopup.hideResultsPresentation();
 			}
 		};
 	</script>
@@ -105,9 +120,11 @@
 		<h2>Show error list</h2>
 		<p>
 			<input type="radio" id="showerrorlist" name="errorlist" value="showerrorlist">
-			<label for="showerrorlist">Yes</label>
+			<label for="showerrorlist">Yes</label><br>
 			<input type="radio" id="noerrorlist" name="errorlist" value="noerrorlist">
-			<label for="noerrorlist">No</label>
+			<label for="noerrorlist">No</label><br>
+			<input type="radio" id="showerrorlistatclick" name="errorlist" value="showerrorlistatclick">
+			<label for="showerrorlistatclick">At icon click</label>
 		</p>
 		
 		<h2>Validate at icon-click</h2>

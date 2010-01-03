@@ -5,6 +5,9 @@ var htmlvalidator = function () {
 		loading,
 		messagePresentation,
 		messagePresentationContent,
+		url, 
+		errors, 
+		errorLength,
 	
 	init = function () {
 		chrome.extension.sendRequest({
@@ -26,7 +29,10 @@ var htmlvalidator = function () {
 				else {
 					hideResultsPresentation();
 				}
-			}	
+			}
+			else if (evt.keyCode === 27) {
+				hideResultsPresentation();
+			}
 		});
 			
 		chrome.extension.onRequest.addListener(receiveRequest);
@@ -50,11 +56,13 @@ var htmlvalidator = function () {
 	
 	hideResultsPresentation = function () {
 		hasBeenValidated = false;
-		resultsPresentation.slideUp(100, function () {
-			resultsPresentation.css({
-				height : 0
+		if (resultsPresentation.length > 0) {
+			resultsPresentation.slideUp(100, function () {
+				resultsPresentation.css({
+					height : 0
+				});
 			});
-		});
+		}
 	},
 	
 	showMessage = function (message) {
@@ -81,6 +89,12 @@ var htmlvalidator = function () {
 			else if (requestResultsMessage === "hide-loading") {
 				loading.hide();
 			}
+			else if (requestResultsMessage === "create-error-list") {
+				createErrorList();
+			}
+			else if (requestResultsMessage === "hide-error-list") {
+				hideResultsPresentation();
+			}
 			else {
 				loading.hide();
 				showMessage(requestResultsMessage);
@@ -93,13 +107,14 @@ var htmlvalidator = function () {
 				var results = JSON.parse(requestResults),
 					messages = results.messages,
 					showErrorList = request.showErrorList,
-					url = results.url,
-					errors = [],
+					showErrorList = request.showErrorList,
 					resultsPresentationContent,
 					message,
 					error,
-					errorLength,
 					validationInfoLink;
+					
+					url = results.url;
+					errors = [];
 				}
 				catch (e) {
 					showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
@@ -124,35 +139,39 @@ var htmlvalidator = function () {
 			);
 			
 			if (showErrorList === "showerrorlist") {
-				resultsPresentation = $("#html-validation-results");
-				if (resultsPresentation.length === 0) {
-					resultsPresentation = $('<div id="html-validation-results" />');
-					body.append(resultsPresentation);
-				}
-
-				resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + errorLength + ' errors</span>') + '</h1>';
-				resultsPresentationContent = $('<div id="html-validation-results-content" />').appendTo(resultsPresentation);
-				resultsPresentationContent[0].innerHTML = '';
-
-				for (var j=0, jl=errorLength; j<jl; j++) {
-					error = errors[j];
-					resultsPresentationContent.append($('<div class="html-validation-error">Line ' + error.line
-					 	+ ', column ' + error.column + ': '
-					 	+ '<b>' + error.message + '</b>'
-					 + ' </div>'));
-				}
-
-				validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.nu/?doc=' + url + '" title="Validate this URL at the Validator.nu web site" target="_blank">Validator.nu</a></div>').appendTo(resultsPresentationContent);
-
-				resultsPresentation.animate({
-					height : 200
-				}, 100);
-
-				$("#html-validation-close").click(function () {
-					hideResultsPresentation();
-				});
+				createErrorList();
 			}
 		}
+	},
+	
+	createErrorList = function () {
+		resultsPresentation = $("#html-validation-results");
+		if (resultsPresentation.length === 0) {
+			resultsPresentation = $('<div id="html-validation-results" />');
+			body.append(resultsPresentation);
+		}
+
+		resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + errorLength + ' errors</span>') + '</h1>';
+		resultsPresentationContent = $('<div id="html-validation-results-content" />').appendTo(resultsPresentation);
+		resultsPresentationContent[0].innerHTML = '';
+
+		for (var j=0, jl=errorLength; j<jl; j++) {
+			error = errors[j];
+			resultsPresentationContent.append($('<div class="html-validation-error">Line ' + error.line
+			 	+ ', column ' + error.column + ': '
+			 	+ '<b>' + error.message + '</b>'
+			 + ' </div>'));
+		}
+
+		validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.nu/?doc=' + url + '" title="Validate this URL at the Validator.nu web site" target="_blank">Validator.nu</a></div>').appendTo(resultsPresentationContent);
+
+		resultsPresentation.animate({
+			height : 200
+		}, 100);
+
+		$("#html-validation-close").click(function () {
+			hideResultsPresentation();
+		});
 	};
 	
 	return {
@@ -160,6 +179,3 @@ var htmlvalidator = function () {
 	};
 }();
 htmlvalidator.init();
-
-
-window.htmlvalidator = htmlvalidator;
