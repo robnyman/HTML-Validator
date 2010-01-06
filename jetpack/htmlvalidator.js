@@ -22,7 +22,7 @@ var htmlValidator = function () {
 			});
 
 			jetpack.statusBar.append({
-				html : '<style type="text/css">#html-validation-icon{vertical-align: middle; margin-right: 5px} #validation-error-count{cursor: default}</style><img id="html-validation-icon" src="http://github.com/robnyman/HTML-Validator/raw/master/google-chrome/images/icon-16.png"><span id="validation-error-count">Validate</span>',
+				html : '<style type="text/css">#html-validation-icon{vertical-align: middle; margin-right: 5px} #validation-error-count{cursor: default}</style><img id="html-validation-icon" src="http://github.com/robnyman/HTML-Validator/raw/master/jetpack/images/icon-16.png"><span id="validation-error-count">Validate</span>',
 				width : 80,
 				onReady : function (doc) {
 					// Check for settings once it works properly with Jetpack...
