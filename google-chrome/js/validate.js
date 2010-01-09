@@ -95,6 +95,24 @@ var htmlvalidator = function () {
 			else if (requestResultsMessage === "hide-error-list") {
 				hideResultsPresentation();
 			}
+			else if (requestResultsMessage === "validate-local-html") {
+				var xhr = new XMLHttpRequest();
+
+				// If the result is finished, send complete page HTML code to W3C validator
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4) {
+						chrome.extension.sendRequest({
+								sendPageHTMLToValidator : true,
+								pageHTML : xhr.responseText
+							}
+						);
+					}
+				};
+
+				// Send XHR request to itself to get the entire HTML code
+				xhr.open("GET", location.href, true);
+				xhr.send(null);
+			}
 			else {
 				loading.hide();
 				showMessage(requestResultsMessage);
@@ -118,7 +136,9 @@ var htmlvalidator = function () {
 				}
 				catch (e) {
 					showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
-				}	
+				}
+				
+				console.log(results);
 
 			for (var i=0, il=messages.length; i<il; i++) {
 				message = messages[i];
@@ -128,6 +148,9 @@ var htmlvalidator = function () {
 						"column" : message.lastColumn,
 						"message" : message.message
 					});
+				}
+				else if (message.type === "non-document-error" && message.message.indexOf("HTTP resource not retrievable") !== -1) {
+					return showMessage('Validation failed since this is a local file. <br>Please use the option "Validate local HTML" in the menu instead');
 				}
 			}
 

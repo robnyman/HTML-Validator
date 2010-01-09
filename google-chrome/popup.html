@@ -51,6 +51,9 @@
 				document.getElementById("new-tab-validation").onclick = function () {
 					backgroundPage.validate("new-tab");
 				}
+				document.getElementById("validate-local-html").onclick = function () {
+					backgroundPage.validate("validate-local-html");
+				}
 				
 				if (backgroundPage.getPref("iconclick") === "iconvalidate") {
 					backgroundPage.validate();
@@ -101,6 +104,7 @@
 	<div id="container">
 		<a href="#" id="inline-validation">Validate inline</a>
 		<a href="#" id="new-tab-validation">W3C validator</a>
+		<a href="#" id="validate-local-html">Validate local HTML</a>
 		
 		<h1>Options</h1>
 		<h2>Autorun</h2>

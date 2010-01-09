@@ -20,6 +20,11 @@
 								validate();
 							}
 						}
+						else if (request.sendPageHTMLToValidator) {
+							chrome.tabs.create({
+								url : "http://validator.w3.org/check?fragment=" + encodeURIComponent(request.pageHTML)
+							});
+						}
 					}
 				);
 			},
@@ -121,6 +126,16 @@
 						chrome.tabs.create({
 							url : "http://validator.w3.org/check?uri=" + encodeURIComponent(tabUrl)
 						});
+					}
+					else if (validatorType === "validate-local-html") {
+						chrome.tabs.sendRequest(
+							tab.id, 
+							{
+								results : {
+									"message" : "validate-local-html"
+								}
+							}
+						);
 					}
 				});
 			},
