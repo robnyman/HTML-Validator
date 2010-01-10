@@ -1,3 +1,16 @@
+VERSION 1.1.3
+___________________
+
+- Added better presentation for when validation fails
+- Added timer for showing results in case it's before the validation has been completed
+
+
+VERSION 1.1.2
+___________________
+
+- Fixed bug where Validate local HTML had to be clicked twice to work
+
+
 VERSION 1.1.1
 ___________________
 

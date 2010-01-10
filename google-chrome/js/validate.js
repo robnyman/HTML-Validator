@@ -135,6 +135,11 @@ var htmlvalidator = function () {
 					errors = [];
 				}
 				catch (e) {
+					chrome.extension.sendRequest({
+							setBadgeValues : true,
+							errors : "X"
+						}
+					);
 					showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
 				}
 				
@@ -148,6 +153,12 @@ var htmlvalidator = function () {
 					});
 				}
 				else if (message.type === "non-document-error" && message.message.indexOf("HTTP resource not retrievable") !== -1) {
+					chrome.extension.sendRequest({
+							setBadgeValues : true,
+							errors : "X"
+						}
+					);
+					errorLength = "Can't validate this document";
 					return showMessage('Validation failed since this is a local file. <br>Please use the option "Validate local HTML" in the menu instead');
 				}
 			}
@@ -166,13 +177,20 @@ var htmlvalidator = function () {
 	},
 	
 	createErrorList = function () {
+		
+		if (typeof errorLength === "undefined") {
+			return setTimeout(function () {
+				createErrorList();
+			}, 100);
+		}
+		
 		resultsPresentation = $("#html-validation-results");
 		if (resultsPresentation.length === 0) {
 			resultsPresentation = $('<div id="html-validation-results" />');
 			body.append(resultsPresentation);
 		}
-
-		resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + errorLength + ' errors</span>') + '</h1>';
+		
+		resultsPresentation[0].innerHTML = '<span id="html-validation-close" title="Close">X</span><h1 class="">Validation Output: ' + ((errorLength === 0)? '<span class="valid">This document is valid!</span>' : '<span class="invalid">' + ((typeof errorLength === "number")? (errorLength + " errors") : errorLength) + ' </span>') + '</h1>';
 		resultsPresentationContent = $('<div id="html-validation-results-content" />').appendTo(resultsPresentation);
 		resultsPresentationContent[0].innerHTML = '';
 

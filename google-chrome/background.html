@@ -33,7 +33,7 @@
 					});
 
 					chrome.browserAction.setBadgeBackgroundColor({
-						color : (errors > 0)? [210, 61, 36, 255] : [85, 176, 90, 255],
+						color : (errors > 0 || errors === "X")? [210, 61, 36, 255] : [85, 176, 90, 255],
 						tabId : tabId
 					});
 				});
