@@ -138,8 +138,6 @@ var htmlvalidator = function () {
 					showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
 				}
 				
-				console.log(results);
-
 			for (var i=0, il=messages.length; i<il; i++) {
 				message = messages[i];
 				if (message.type === "error") {
