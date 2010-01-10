@@ -103,7 +103,7 @@ var htmlvalidator = function () {
 					if (xhr.readyState === 4) {
 						var htmlForm = $("#post-html-for-validation");
 						if (htmlForm.length === 0) {
-							$('<form id="post-html-for-validation" method="post" action="' + "http://validator.w3.org/check" + '" target="_blank"><input type="text" id="fragment" name="fragment" value=\'' + xhr.responseText.replace(/'/g, "&#145;") + '\'></form>').appendTo(document.body);
+							htmlForm = $('<form id="post-html-for-validation" method="post" action="' + "http://validator.w3.org/check" + '" target="_blank"><input type="text" id="fragment" name="fragment" value=\'' + xhr.responseText.replace(/'/g, "&#145;") + '\'></form>').appendTo(document.body);
 						}
 						htmlForm[0].submit();
 					}
