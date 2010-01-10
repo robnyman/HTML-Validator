@@ -101,11 +101,8 @@ var htmlvalidator = function () {
 				// If the result is finished, send complete page HTML code to W3C validator
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4) {
-						chrome.extension.sendRequest({
-								sendPageHTMLToValidator : true,
-								pageHTML : xhr.responseText
-							}
-						);
+						$('<form id="post-html-for-validation" method="post" action="' + "http://validator.w3.org/check" + '" target="_blank"><input type="text" id="fragment" name="fragment" value=\'' + xhr.responseText.replace(/'/g, "&#145;") + '\'></form>').appendTo(document.body)[0].submit();
+						
 					}
 				};
 

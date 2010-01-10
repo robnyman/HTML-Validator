@@ -1,0 +1,6 @@
+VERSION 1.1.1
+___________________
+
+- Changed Validate local to post the HTML from the page, to cater for long content
+- Removed border on closing button in page message/feedback
+- Removed console logging messages

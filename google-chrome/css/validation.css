@@ -50,10 +50,8 @@
 	text-align: center;
 	color: #fff;
 	background: #d23d24;
-	-webkit-border-radius : 5px;
 	border-radius : 5px;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#d23d24), color-stop(0.5, #d23d24));
-	border: 1px solid #000;
 	padding-top: 3px;
 	cursor: pointer;
 }
@@ -144,4 +142,9 @@
 	border-radius : 5px;
 	margin: 100px 0 20px;
 	padding: 5px 10px;
+}
+
+#post-html-for-validation {
+	position: absolute;
+	visibility: hidden;
 }

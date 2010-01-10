@@ -20,11 +20,6 @@
 								validate();
 							}
 						}
-						else if (request.sendPageHTMLToValidator) {
-							chrome.tabs.create({
-								url : "http://validator.w3.org/check?fragment=" + encodeURIComponent(request.pageHTML)
-							});
-						}
 					}
 				);
 			},
@@ -50,7 +45,7 @@
 						autorun = getPref("autorun") || "true",
 						usetimeout = getPref("usetimeout") || "true",
 						loadingindicator = getPref("loadingindicator") || "true",
-						tabUrl = tab.url.replace(/#[^\?]+/, ""); // Replace hash for bookmars since it throws the validator
+						tabUrl = tab.url.replace(/#[^\?]+/, ""); // Replace hash for bookmarks since it throws the validator
 
 					if (validatorType === "inline" && (!(/(validator\.nu|validator\.w3\.org)/.test(tabUrl)) && autorun)) { // To avoid inline validation of the Validator.nu and W3C validator
 						
@@ -62,8 +57,9 @@
 							Commented out URL for possible future use of the W3C API.
 							As of now, though, it doesn't return valid JSON
 						*/
-						//var url = "http://validator.w3.org/check?uri=" + tab.url + ";output=json",
-						var url = "http://validator.nu/?doc=" + tabUrl + "&out=json",
+						//var url = "http://validator.w3.org/check?uri=" + encodeURIComponent(tabUrl) + ";output=json",
+						
+						var url = "http://validator.nu/?doc=" + encodeURIComponent(tabUrl) + "&out=json",
 							xhr = new XMLHttpRequest(),
 							timer,
 							loadingTimer,
@@ -198,5 +194,5 @@
 			};
 		}();
 		htmlvalidatorbackground.init();
-	</script>
+	</script>	
 </html>
