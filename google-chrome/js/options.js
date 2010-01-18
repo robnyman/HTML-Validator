@@ -9,7 +9,7 @@ var htmlvalidatoroptions = function () {
 		defaults = {
 			autorun : "true",
 			validator : "inline",
-			errorlist : "showerrorlist",
+			errorlist : "showerrorlistatclick",
 			iconclick : "icondontvalidate",
 			usetimeout : "true",
 			loadingindicator : "true"
@@ -81,12 +81,12 @@ var htmlvalidatoroptions = function () {
 					usetimeout : usetimeout.checked,
 					loadingindicator : loadingindicator.checked
 				});
-			}
+			};
 		};
 		
 	return {
 		init : init
-	}	
+	};	
 }();
 
 window.onload = function () {

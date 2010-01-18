@@ -47,19 +47,21 @@
 			init = function () {
 				document.getElementById("inline-validation").onclick = function () {
 					backgroundPage.validate("inline");
-				}
+				};
 				document.getElementById("new-tab-validation").onclick = function () {
 					backgroundPage.validate("new-tab");
-				}
+				};
 				document.getElementById("validate-local-html").onclick = function () {
 					backgroundPage.validate("validate-local-html");
-				}
+				};
 				
 				if (backgroundPage.getPref("iconclick") === "iconvalidate") {
 					backgroundPage.validate();
 				}
 				
-				if (backgroundPage.getPref("errorlist") === "showerrorlistatclick") {
+				
+				var errorList = backgroundPage.getPref("errorlist");
+				if (typeof errorList === "undefined" || errorList === "showerrorlistatclick") {
 					backgroundPage.createErrorList();
 				}
 				

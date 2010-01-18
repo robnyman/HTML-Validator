@@ -125,7 +125,6 @@ var htmlvalidator = function () {
 				var results = JSON.parse(requestResults),
 					messages = results.messages,
 					showErrorList = request.showErrorList,
-					showErrorList = request.showErrorList,
 					resultsPresentationContent,
 					message,
 					error,
@@ -159,7 +158,7 @@ var htmlvalidator = function () {
 						}
 					);
 					errorLength = "Can't validate this document";
-					return showMessage('Validation failed since this is a local file. <br>Please use the option "Validate local HTML" in the menu instead');
+					return showMessage('Validation failed since this is a <br>protecteded page/local file. <br><br>Please use the option "Validate local HTML" in the menu instead');
 				}
 			}
 
@@ -174,6 +173,7 @@ var htmlvalidator = function () {
 				createErrorList();
 			}
 		}
+		return requestResults;
 	},
 	
 	createErrorList = function () {
@@ -211,6 +211,8 @@ var htmlvalidator = function () {
 		$("#html-validation-close").click(function () {
 			hideResultsPresentation();
 		});
+		
+		return true;
 	};
 	
 	return {
