@@ -37,21 +37,24 @@ var htmlvalidator = function () {
 			
 		chrome.extension.onRequest.addListener(receiveRequest);
 		
-		loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(body);
-		loading.css({
-			left : ($(document).width() / 2) - (loading.width() / 2),
-			top : "30%"
-		});
+		if (!(/acid3.acidtests.org/.test(location.href))) {
 		
-		messagePresentation = $('<div id="html-validator-message"><span id="html-validation-message-close">X</span><div id="html-validator-message-content"></div></div>').appendTo(body);
-		messagePresentation.css({
-			left : ($(document).width() / 2) - (messagePresentation.width() / 2),
-			top : "30%"
-		});
-		messagePresentationContent = $("#html-validator-message-content");
-		$("#html-validation-message-close").click(function () {
-			messagePresentation.fadeOut("fast");
-		});
+			loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(body);
+			loading.css({
+				left : ($(document).width() / 2) - (loading.width() / 2),
+				top : "30%"
+			});
+		
+			messagePresentation = $('<div id="html-validator-message"><span id="html-validation-message-close">X</span><div id="html-validator-message-content"></div></div>').appendTo(body);
+			messagePresentation.css({
+				left : ($(document).width() / 2) - (messagePresentation.width() / 2),
+				top : "30%"
+			});
+			messagePresentationContent = $("#html-validator-message-content");
+			$("#html-validation-message-close").click(function () {
+				messagePresentation.fadeOut("fast");
+			});
+		}	
 	},
 	
 	hideResultsPresentation = function () {
