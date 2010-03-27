@@ -22,12 +22,16 @@ var htmlvalidator = function () {
 		);
 		
 		$(document).keydown(function (evt) {
-			if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.keyCode === 86) {
-				if (!hasBeenValidated) {
-					validate();
+			if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey) {
+				if (evt.keyCode === 86) {
+					validate("new-tab");
 				}
-				else {
-					hideResultsPresentation();
+				else if (evt.keyCode === 65) {
+					receiveRequest({
+						results : {
+							"message" : "validate-local-html"
+						}
+					});
 				}
 			}
 			else if (evt.keyCode === 27) {
@@ -75,7 +79,6 @@ var htmlvalidator = function () {
 
 	validate = function (validation) {
 		chrome.extension.sendRequest({
-				//html : document.documentElement.firstChild.nodeValue.replace(/[\n\r\t]/g, "")
 				validate : true,
 				validation : validation || "inline"
 			}
@@ -104,11 +107,23 @@ var htmlvalidator = function () {
 				// If the result is finished, send complete page HTML code to W3C validator
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4) {
-						var htmlForm = $("#post-html-for-validation");
-						if (htmlForm.length === 0) {
-							htmlForm = $('<form id="post-html-for-validation" method="post" action="' + "http://validator.w3.org/check" + '" target="_blank"><input type="text" id="fragment" name="fragment" value=\'' + xhr.responseText.replace(/'/g, "&#145;") + '\'></form>').appendTo(document.body);
-						}
-						htmlForm[0].submit();
+						var htmlForm = document.createElement("form"),
+							htmlInput = document.createElement("input");
+							
+						htmlForm.action = "http://validator.w3.org/check";
+						htmlForm.method = "post";
+						htmlForm.enctype = "multipart/form-data";
+						htmlForm.target = "_blank";
+						
+						htmlInput.type = "text";
+						htmlInput.name = "fragment";
+						htmlInput.value = xhr.responseText;
+						
+						htmlForm.appendChild(htmlInput);
+						
+						document.body.appendChild(htmlForm);
+						htmlForm.submit();
+						htmlForm.parentNode.removeChild(htmlForm);
 					}
 				};
 

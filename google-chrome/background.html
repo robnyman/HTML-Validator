@@ -9,7 +9,7 @@
 				chrome.extension.onRequest.addListener(
 					function (request, sender, sendResponse) {
 						if (request.validate) {
-							validate();
+							validate(request.validation);
 						}
 						else if (request.setBadgeValues) {
 							formatBadge(request.errors);
