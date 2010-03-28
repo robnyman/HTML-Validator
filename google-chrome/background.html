@@ -20,6 +20,9 @@
 								validate();
 							}
 						}
+						else if (request.validateLocal) {
+							validate("validate-local-inline", request.html);
+						}
 					}
 				);
 			},
@@ -39,7 +42,7 @@
 				});
 			},
 			
-			validate = function (validation) {
+			validate = function (validation, html) {
 				chrome.tabs.getSelected(null, function (tab) {
 					var validatorType = validation || getPref("validator") || "inline",
 						autorun = getPref("autorun") || "true",
@@ -47,20 +50,15 @@
 						loadingindicator = getPref("loadingindicator") || "true",
 						tabUrl = tab.url.replace(/#[^\?]+/, ""); // Replace hash for bookmarks since it throws the validator
 
-					if (validatorType === "inline" && (!(/(validator\.nu|validator\.w3\.org)/.test(tabUrl)) && autorun)) { // To avoid inline validation of the Validator.nu and W3C validator
+					if (validatorType === "inline" && (!(/(validator\.nu|validator\.w3\.org)/.test(tabUrl)) && autorun)) { // To avoid inline validation of the W3C validator
 						
 						// To clear possible previous ongoing validation attempts
 						clearTimeout(timer);
 						clearTimeout(loadingTimer);
 
-						/*
-							Commented out URL for possible future use of the W3C API.
-							As of now, though, it doesn't return valid JSON
-						*/
-						//var url = "http://validator.w3.org/check?uri=" + encodeURIComponent(tabUrl) + ";output=json",
-						
-						var url = "http://validator.nu/?doc=" + encodeURIComponent(tabUrl) + "&out=json",
+						var url = "http://validator.w3.org/check?uri=" + encodeURIComponent(tabUrl) + "&output=json",
 							xhr = new XMLHttpRequest(),
+							xhrAborted = false,
 							timer,
 							loadingTimer,
 							sendResults = function (result) {
@@ -86,14 +84,23 @@
 								sendResults({
 									"message" : "Validation timed out. Please try again or <a href=\"http://validator.w3.org/check?uri=" + encodeURIComponent(tabUrl) + "\" target=\"_blank\">validate this page at W3C</a>"
 								});
-							}, 3000);
+							}, 5000);
 						}
 
 						// If the result is finished, send validation results to the page
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4) {
 								clearTimeout(timer);
-								sendResults(xhr.responseText);
+								if (xhr.getResponseHeader("X-W3C-Validator-Status") === "Abort") {
+									sendResults({
+										"message" : "validate-local-html",
+										"inline" : true
+									});
+								}
+								else {
+									formatBadge(xhr.getResponseHeader("X-W3C-Validator-Errors"));
+									sendResults(xhr.responseText);
+								}
 							}
 						};
 						
@@ -114,11 +121,31 @@
 							}, 200);
 						}
 
-						// Send validation request to validator.nu
+						// Send validation request to W3C
 						xhr.open("GET", url, true);
 						xhr.send(null);
 					}
-					else if (validatorType === "new-tab" && !(/validator\.w3\.org/.test(tabUrl))) { // URL check to avoid validating the W3C or Validator.nu validator... :-)
+					else if (validatorType === "validate-local-inline") {
+						var xhrInline = new XMLHttpRequest(),
+							params = "output=json&fragment=" + encodeURIComponent(html);
+							
+						xhrInline.onreadystatechange = function () {
+							if (xhrInline.readyState === 4) {
+								formatBadge(xhrInline.getResponseHeader("X-W3C-Validator-Errors"));
+								chrome.tabs.sendRequest(
+									tab.id, 
+									{
+										results : xhrInline.responseText,
+										showErrorList : getPref("errorlist") || "showerrorlistatclick"
+									}
+								);
+							}	
+						};
+						xhrInline.open("POST", "http://validator.w3.org/check", true);
+						xhrInline.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+						xhrInline.send(params);
+					}
+					else if (validatorType === "new-tab" && !(/validator\.w3\.org/.test(tabUrl))) { // URL check to avoid validating the W3C validator... :-)
 						chrome.tabs.create({
 							url : "http://validator.w3.org/check?uri=" + encodeURIComponent(tabUrl)
 						});

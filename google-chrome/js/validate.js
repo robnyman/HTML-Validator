@@ -44,16 +44,8 @@ var htmlvalidator = function () {
 		if (!(/acid3.acidtests.org/.test(location.href))) {
 		
 			loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(body);
-			loading.css({
-				left : ($(document).width() / 2) - (loading.width() / 2),
-				top : "30%"
-			});
 		
 			messagePresentation = $('<div id="html-validator-message"><span id="html-validation-message-close">X</span><div id="html-validator-message-content"></div></div>').appendTo(body);
-			messagePresentation.css({
-				left : ($(document).width() / 2) - (messagePresentation.width() / 2),
-				top : "30%"
-			});
 			messagePresentationContent = $("#html-validator-message-content");
 			$("#html-validation-message-close").click(function () {
 				messagePresentation.fadeOut("fast");
@@ -86,7 +78,15 @@ var htmlvalidator = function () {
 	},
 	
 	receiveRequest = function (request, sender, sendResponse) {
-		var requestResults = request.results;
+		var requestResults = request.results,
+			showFailedValidation = function () {
+				chrome.extension.sendRequest({
+						setBadgeValues : true,
+						errors : "X"
+					}
+				);
+				showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
+			};
 		if (typeof requestResults === "object") {
 			var requestResultsMessage = requestResults.message;
 			if (requestResultsMessage === "show-loading") {
@@ -94,6 +94,11 @@ var htmlvalidator = function () {
 			}
 			else if (requestResultsMessage === "hide-loading") {
 				loading.hide();
+			}
+			else if (requestResultsMessage === "show-failed-validation") {
+				alert("Good fail");
+				loading.hide();
+				showFailedValidation();
 			}
 			else if (requestResultsMessage === "create-error-list") {
 				createErrorList();
@@ -107,23 +112,32 @@ var htmlvalidator = function () {
 				// If the result is finished, send complete page HTML code to W3C validator
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4) {
-						var htmlForm = document.createElement("form"),
-							htmlInput = document.createElement("input");
+						if (request.results.inline) {
+							chrome.extension.sendRequest({
+									validateLocal : true,
+									html : xhr.responseText
+								}
+							);
+						}
+						else {
+							var htmlForm = document.createElement("form"),
+								htmlInput = document.createElement("input");
 							
-						htmlForm.action = "http://validator.w3.org/check";
-						htmlForm.method = "post";
-						htmlForm.enctype = "multipart/form-data";
-						htmlForm.target = "_blank";
+							htmlForm.action = "http://validator.w3.org/check";
+							htmlForm.method = "post";
+							htmlForm.enctype = "multipart/form-data";
+							htmlForm.target = "_blank";
 						
-						htmlInput.type = "text";
-						htmlInput.name = "fragment";
-						htmlInput.value = xhr.responseText;
+							htmlInput.type = "text";
+							htmlInput.name = "fragment";
+							htmlInput.value = xhr.responseText;
 						
-						htmlForm.appendChild(htmlInput);
+							htmlForm.appendChild(htmlInput);
 						
-						document.body.appendChild(htmlForm);
-						htmlForm.submit();
-						htmlForm.parentNode.removeChild(htmlForm);
+							document.body.appendChild(htmlForm);
+							htmlForm.submit();
+							htmlForm.parentNode.removeChild(htmlForm);
+						}
 					}
 				};
 
@@ -152,12 +166,7 @@ var htmlvalidator = function () {
 					errors = [];
 				}
 				catch (e) {
-					chrome.extension.sendRequest({
-							setBadgeValues : true,
-							errors : "X"
-						}
-					);
-					showMessage('Validation failed. Please try again or <a href="http://validator.w3.org/check?uri=' + encodeURIComponent(location.href) + '" target="_blank">validate this page at W3C</a>');
+					showFailedValidation();
 				}
 				
 			for (var i=0, il=messages.length; i<il; i++) {
@@ -181,11 +190,6 @@ var htmlvalidator = function () {
 			}
 
 			errorLength = errors.length;
-			chrome.extension.sendRequest({
-					setBadgeValues : true,
-					errors : errorLength
-				}
-			);
 			
 			if (showErrorList === "showerrorlist") {
 				createErrorList();
@@ -220,7 +224,7 @@ var htmlvalidator = function () {
 			 + ' </div>'));
 		}
 
-		validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.nu/?doc=' + url + '" title="Validate this URL at the Validator.nu web site" target="_blank">Validator.nu</a></div>').appendTo(resultsPresentationContent);
+		validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.w3.org/check?uri=' + url + '" title="Validate this URL at the W3C Validator web site" target="_blank">W3C Validator</a></div>').appendTo(resultsPresentationContent);
 
 		resultsPresentation.animate({
 			height : 200
