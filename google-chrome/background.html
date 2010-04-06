@@ -91,7 +91,8 @@
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4) {
 								clearTimeout(timer);
-								if (xhr.getResponseHeader("X-W3C-Validator-Status") === "Abort") {
+								var status = xhr.getResponseHeader("X-W3C-Validator-Status");
+								if (!status || status === "Abort") {
 									sendResults({
 										"message" : "validate-local-html",
 										"inline" : true
@@ -126,19 +127,40 @@
 						xhr.send(null);
 					}
 					else if (validatorType === "validate-local-inline") {
+						chrome.tabs.sendRequest(
+							tab.id, 
+							{
+								results : {
+									"message" : "hide-message"
+								}
+							}
+						);
 						var xhrInline = new XMLHttpRequest(),
 							params = "output=json&fragment=" + encodeURIComponent(html);
 							
 						xhrInline.onreadystatechange = function () {
 							if (xhrInline.readyState === 4) {
-								formatBadge(xhrInline.getResponseHeader("X-W3C-Validator-Errors"));
-								chrome.tabs.sendRequest(
-									tab.id, 
-									{
-										results : xhrInline.responseText,
-										showErrorList : getPref("errorlist") || "showerrorlistatclick"
-									}
-								);
+								var response = xhrInline.responseText;
+								if (/For security reasons, validating resources located at non-public IP addresses has been disabled in this service/i.test/(response)) {
+									chrome.tabs.sendRequest(
+										tab.id, 
+										{
+											results : {
+												"message" : "For security reasons, validating resources located at non-public IP addresses has been disabled in this service - W3C"
+											}
+										}
+									);
+								}
+								else {
+									formatBadge(xhrInline.getResponseHeader("X-W3C-Validator-Errors"));
+									chrome.tabs.sendRequest(
+										tab.id, 
+										{
+											results : xhrInline.responseText,
+											showErrorList : getPref("errorlist") || "showerrorlistatclick"
+										}
+									);
+								}
 							}	
 						};
 						xhrInline.open("POST", "http://validator.w3.org/check", true);
@@ -182,7 +204,7 @@
 						}
 					);
 				});
-			}
+			},
 
 			getPref = function (pref) {
 				return localStorage[pref];

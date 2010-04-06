@@ -41,8 +41,7 @@ var htmlvalidator = function () {
 			
 		chrome.extension.onRequest.addListener(receiveRequest);
 		
-		if (!(/acid3.acidtests.org/.test(location.href))) {
-		
+		if (!(/acid3.acidtests.org|\.(png|gif|jpe?g)/.test(location.href))) {
 			loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(body);
 		
 			messagePresentation = $('<div id="html-validator-message"><span id="html-validation-message-close">X</span><div id="html-validator-message-content"></div></div>').appendTo(body);
@@ -95,8 +94,10 @@ var htmlvalidator = function () {
 			else if (requestResultsMessage === "hide-loading") {
 				loading.hide();
 			}
+			else if (requestResultsMessage === "hide-message") {
+				messagePresentation.hide();
+			}
 			else if (requestResultsMessage === "show-failed-validation") {
-				alert("Good fail");
 				loading.hide();
 				showFailedValidation();
 			}
