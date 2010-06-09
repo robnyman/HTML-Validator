@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Hello World</title>
+	<style>
+		.command {
+			cursor: pointer;
+			border: 1px solid transparent;
+			margin-right: 5px;
+			padding: 2px 5px;
+		}
+		
+		.command:hover {
+			background: #ccc;
+			border-color: #333;
+			-webkit-border-radius: 5px;
+		}
+		
+		#validation-results {
+			border-left: 1px solid #333;
+			margin-left: 10px;
+			padding-left: 10px;
+			visibility: hidden;
+		}
+		
+		#validation-results.active {
+			visibility: visible;
+		}
+		
+		form {
+			display: inline;
+		}
+	</style>
+</head>
+<body>
+
+	<span id="validate" class="command">Validate URL</span>
+	<span id="validate-local" class="command">Validate local</span>
+	
+	<span id="validation-results"></span>
+	
+	<script>
+		var htmlValidator = function () {
+			var autorunResults,
+				
+				init = function () {
+
+					// Apply event to validation button
+					document.getElementById("validate").addEventListener("click", function () {
+						var url = safari.application.activeBrowserWindow.activeTab.url;
+						safari.application.activeBrowserWindow.openTab("foreground").url = "http://validator.w3.org/check?uri=" + encodeURIComponent(url);
+					}, false);
+
+					// Apply event to validate local button
+					document.getElementById("validate-local").addEventListener("click", function () {
+						safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("validate-local", true);
+					}, false);
+
+					// Listen for messages
+					safari.application.addEventListener("message", function (e) {
+						var name = e.name,
+							msg = e.message;
+						if (name === "autorun") {
+							autorun();
+						}
+						else if (name === "display-errors") {
+							if (msg) {
+								autorunResults.innerHTML = msg + " errors";
+								autorunResults.className = "active";
+							}
+							else {
+								autorunResults.className = "";
+							}
+						}
+					}, false);
+				},
+				
+				autorun = function (run) {
+					autorunResults = document.getElementById("validation-results");
+					
+					// Check autorun pref
+					if (safari.extension.settings.getItem("autorun")) {
+						autorunResults.className = "active";
+						autorunResults.innerHTML = "<i>Validating</i>";
+						
+						var url = "http://validator.w3.org/check?uri=" + encodeURIComponent(safari.application.activeBrowserWindow.activeTab.url),
+							xhr = new XMLHttpRequest(),
+							xhrAborted = false;
+
+						// If the result is finished, send validation results to the page
+						xhr.onreadystatechange = function () {
+							if (xhr.readyState === 4) {
+								var status = xhr.getResponseHeader("X-W3C-Validator-Status"),
+									errors;
+								if (!status || status === "Abort") {
+									autorunResults.innerHTML = "Validation failed - please try Validate local instead";
+								}
+								else {
+									//alert(status);
+									errors = xhr.getResponseHeader("X-W3C-Validator-Errors");
+									safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("cache-errors", errors);
+								}
+							}
+						};
+
+						// If an error occurs
+						xhr.onerror = function () {
+							autorunResults.innerHTML = "Validation failed - please try Validate local instead";
+						};
+
+						// Send validation request to W3C
+						xhr.open("GET", url, true);
+						xhr.send(null);
+					}
+				};
+			
+			return {
+				init : init
+			};
+		}();
+		htmlValidator.init();
+	</script>
+	
+	
+
+</body>
+</html>
