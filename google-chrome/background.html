@@ -23,6 +23,18 @@
 						else if (request.validateLocal) {
 							validate("validate-local-inline", request.html);
 						}
+						else if (request.openNewTabForForm) {
+							chrome.tabs.create({
+								"url" : request.url
+							}, function (tab) {
+								chrome.tabs.executeScript(
+									tab.id, 
+									{
+										"code" : "htmlvalidator.postForm()"
+									}
+								);
+							});
+						}
 					}
 				);
 			},

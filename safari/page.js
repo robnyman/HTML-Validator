@@ -24,7 +24,7 @@ var htmlValidatorPage = function () {
 					htmlElement = "<html",
 					pageHTMLCode;
 
-				// Getting doctype	
+				// Getting doctype (doctype retrieval inspired by Dario Cangialosi, http://linkedin.com/in/dariocangialosi)
 				if (documentDocType.publicId) {
 					doctype += ' PUBLIC "' + documentDocType.publicId + '"';
 				}

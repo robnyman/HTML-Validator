@@ -42,8 +42,22 @@ var htmlvalidator = function () {
 		chrome.extension.onRequest.addListener(receiveRequest);
 		
 		if (!(/acid3.acidtests.org|\.(png|gif|jpe?g)$/.test(location.href))) {
+			// Insert CSS manually to avoid the invalid code Google Chrome uses to do it
+			var cssParent = document.getElementsByTagName("head")[0],
+				extensionCSS = document.createElement("link");
+			if (!cssParent) {
+				cssParent = document.body;
+			}
+			
+			extensionCSS.rel = "stylesheet";
+			extensionCSS.type = "text/css";
+			extensionCSS.href = chrome.extension.getURL("css/validation.css");
+			cssParent.appendChild(extensionCSS);
+			
+			// Loading element
 			loading = $('<div id="html-validator-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div>').appendTo(body);
 		
+			// Presenting messages
 			messagePresentation = $('<div id="html-validator-message"><span id="html-validation-message-close">X</span><div id="html-validator-message-content"></div></div>').appendTo(body);
 			messagePresentationContent = $("#html-validator-message-content");
 			$("#html-validation-message-close").click(function () {
@@ -74,6 +88,37 @@ var htmlvalidator = function () {
 				validation : validation || "inline"
 			}
 		);
+	},
+	
+	getPageHTMLCode = function () {
+		var documentDocType = document.doctype,
+			doctype = '<!DOCTYPE ' + documentDocType.name,
+			documentHtmlElement = document.documentElement,
+			htmlElement = "<html",
+			pageHTMLCode;
+
+		// Getting doctype (doctype retrieval inspired by Dario Cangialosi, http://linkedin.com/in/dariocangialosi)
+		if (documentDocType.publicId) {
+			doctype += ' PUBLIC "' + documentDocType.publicId + '"';
+		}
+		if (documentDocType.systemId) {
+			doctype += ' "' + documentDocType.systemId + '"';
+		}
+		doctype += '>';
+
+		// Get HTML element attributes
+		for (var i=0, il=documentHtmlElement.attributes.length, attribute; i<il; i++) {
+			attribute = documentHtmlElement.attributes[i];
+			htmlElement += ' ' + attribute.name + '="' + attribute.value + '"';
+		};
+		htmlElement += ">";
+
+		// Concatenate all to get page code
+		pageHTMLCode = doctype + htmlElement + documentHtmlElement.innerHTML;
+		
+		// Replace invalid code inserted with extension file URLs
+		pageHTMLCode = pageHTMLCode.replace(/<[^>]*chrome\-extension:\/\/[^>]*>/g, "");
+		return pageHTMLCode;
 	},
 	
 	receiveRequest = function (request, sender, sendResponse) {
@@ -108,43 +153,21 @@ var htmlvalidator = function () {
 				hideResultsPresentation();
 			}
 			else if (requestResultsMessage === "validate-local-html") {
-				var xhr = new XMLHttpRequest();
-
-				// If the result is finished, send complete page HTML code to W3C validator
-				xhr.onreadystatechange = function () {
-					if (xhr.readyState === 4) {
-						if (request.results.inline) {
-							chrome.extension.sendRequest({
-									validateLocal : true,
-									html : xhr.responseText
-								}
-							);
+				// Send complete page HTML code to W3C validator
+				if (request.results.inline) {
+					chrome.extension.sendRequest({
+							validateLocal : true,
+							html : getPageHTMLCode()
 						}
-						else {
-							var htmlForm = document.createElement("form"),
-								htmlInput = document.createElement("input");
-							
-							htmlForm.action = "http://validator.w3.org/check";
-							htmlForm.method = "post";
-							htmlForm.enctype = "multipart/form-data";
-							htmlForm.target = "_blank";
-						
-							htmlInput.type = "text";
-							htmlInput.name = "fragment";
-							htmlInput.value = xhr.responseText;
-						
-							htmlForm.appendChild(htmlInput);
-						
-							document.body.appendChild(htmlForm);
-							htmlForm.submit();
-							htmlForm.parentNode.removeChild(htmlForm);
+					);
+				}
+				else {
+					chrome.extension.sendRequest({
+							openNewTabForForm : true,
+							url : location.href
 						}
-					}
-				};
-
-				// Send XHR request to itself to get the entire HTML code
-				xhr.open("GET", location.href, true);
-				xhr.send(null);
+					);
+				}
 			}
 			else {
 				loading.hide();
@@ -199,6 +222,34 @@ var htmlvalidator = function () {
 		return requestResults;
 	},
 	
+	postForm = function () {
+		loading.hide();
+		
+		$('<div id="html-validation-overlay"><div id="html-validator-overlay-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div></div>').appendTo(body);
+		
+		var loadTimer = setInterval(function () {
+			if (document.readyState === "complete") {
+				clearInterval(loadTimer);
+				var htmlForm = document.createElement("form"),
+					htmlInput = document.createElement("input");
+
+				htmlForm.action = "http://validator.w3.org/check";
+				htmlForm.method = "post";
+				htmlForm.enctype = "multipart/form-data";
+
+				htmlInput.type = "text";
+				htmlInput.name = "fragment";
+				htmlInput.value = getPageHTMLCode();
+
+				htmlForm.appendChild(htmlInput);
+
+				document.body.appendChild(htmlForm);
+				htmlForm.submit();
+				htmlForm.parentNode.removeChild(htmlForm);
+			}
+		}, 10);
+	},
+	
 	createErrorList = function () {
 		
 		if (typeof errorLength === "undefined") {
@@ -225,7 +276,9 @@ var htmlvalidator = function () {
 			 + ' </div>'));
 		}
 
-		validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.w3.org/check?uri=' + url + '" title="Validate this URL at the W3C Validator web site" target="_blank">W3C Validator</a></div>').appendTo(resultsPresentationContent);
+		if (!/Form Submission/.test(url)) {
+			validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.w3.org/check?uri=' + url + '" title="Validate this URL at the W3C Validator web site" target="_blank">W3C Validator</a></div>').appendTo(resultsPresentationContent);
+		}
 
 		resultsPresentation.animate({
 			height : 200
@@ -239,7 +292,8 @@ var htmlvalidator = function () {
 	};
 	
 	return {
-		init : init
+		init : init,
+		postForm : postForm
 	};
 }();
 htmlvalidator.init();

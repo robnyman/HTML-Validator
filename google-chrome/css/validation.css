@@ -147,3 +147,37 @@
 	margin: 100px 0 20px;
 	padding: 5px 10px;
 }
+
+#html-validation-overlay {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 90%;
+	padding-top: 10%;
+	z-index: 999999;
+	text-align: center;
+	background: rgba(255, 255, 255, 0.8);
+}
+
+#html-validator-overlay-loading {
+	position: relative;
+	width: 150px;
+	color: #fff;
+	font-size: 14px;
+	text-align: center;
+	background: #000;
+	opacity: 0.8;
+	border: 1px solid #000;
+	padding: 10px;
+	margin: 0 auto;
+	font: 14px Helvetica, Verdana, sans-serif !important;
+	-webkit-border-radius : 10px;
+	border-radius : 10px;
+}
+
+#html-validator-overlay-loading img {
+	position : absolute !important;
+	left: 10px !important;
+	top: 10px !important;
+}
