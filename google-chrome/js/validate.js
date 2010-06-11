@@ -153,20 +153,31 @@ var htmlvalidator = function () {
 				hideResultsPresentation();
 			}
 			else if (requestResultsMessage === "validate-local-html") {
-				// Send complete page HTML code to W3C validator
+				// Code to validate generated source put on hold since Chrome's generated source omits closing slashes on meta, img and other quick-close elements
+				
 				if (request.results.inline) {
-					chrome.extension.sendRequest({
-							validateLocal : true,
-							html : getPageHTMLCode()
+					// Post page itself to get entire source code
+					var xhr = new XMLHttpRequest();
+
+					// If the result is finished, send complete page HTML code to W3C validator
+					xhr.onreadystatechange = function () {
+						if (xhr.readyState === 4) {
+							chrome.extension.sendRequest({
+								validateLocal : true,
+								html : xhr.responseText
+							});	
 						}
-					);
+					};
+
+					// Send XHR request to itself to get the entire HTML code
+					xhr.open("GET", location.href, true);
+					xhr.send(null);
 				}
 				else {
 					chrome.extension.sendRequest({
-							openNewTabForForm : true,
-							url : location.href
-						}
-					);
+						openNewTabForForm : true,
+						url : location.href
+					});
 				}
 			}
 			else {
@@ -227,9 +238,13 @@ var htmlvalidator = function () {
 		
 		$('<div id="html-validation-overlay"><div id="html-validator-overlay-loading"><img src="' + chrome.extension.getURL("images/loading.gif") + ' " />Validating...</div></div>').appendTo(body);
 		
-		var loadTimer = setInterval(function () {
-			if (document.readyState === "complete") {
-				clearInterval(loadTimer);
+		// Post page itself to get entire source code
+		var xhr = new XMLHttpRequest();
+
+		// If the result is finished, send complete page HTML code to W3C validator
+		xhr.onreadystatechange = function () {
+			if (xhr.readyState === 4) {
+				
 				var htmlForm = document.createElement("form"),
 					htmlInput = document.createElement("input");
 
@@ -239,7 +254,7 @@ var htmlvalidator = function () {
 
 				htmlInput.type = "text";
 				htmlInput.name = "fragment";
-				htmlInput.value = getPageHTMLCode();
+				htmlInput.value = xhr.responseText;
 
 				htmlForm.appendChild(htmlInput);
 
@@ -247,7 +262,11 @@ var htmlvalidator = function () {
 				htmlForm.submit();
 				htmlForm.parentNode.removeChild(htmlForm);
 			}
-		}, 10);
+		};
+
+		// Send XHR request to itself to get the entire HTML code
+		xhr.open("GET", location.href, true);
+		xhr.send(null);
 	},
 	
 	createErrorList = function () {
@@ -276,7 +295,7 @@ var htmlvalidator = function () {
 			 + ' </div>'));
 		}
 
-		if (!/Form Submission/.test(url)) {
+		if (!(/Form Submission/).test(url)) {
 			validationInfoLink = $('<div id="html-validation-source">Validation provided by <a href="http://validator.w3.org/check?uri=' + url + '" title="Validate this URL at the W3C Validator web site" target="_blank">W3C Validator</a></div>').appendTo(resultsPresentationContent);
 		}
 
