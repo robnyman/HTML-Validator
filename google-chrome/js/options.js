@@ -12,7 +12,7 @@ var htmlvalidatoroptions = function () {
 			errorlist : "showerrorlistatclick",
 			iconclick : "icondontvalidate",
 			usetimeout : "true",
-			loadingindicator : "true"
+			loadingindicator : "false"
 		},
 		item,
 		pref,
