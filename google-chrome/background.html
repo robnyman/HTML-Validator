@@ -59,7 +59,7 @@
 					var validatorType = validation || getPref("validator") || "inline",
 						autorun = getPref("autorun") || "true",
 						usetimeout = getPref("usetimeout") || "true",
-						loadingindicator = getPref("loadingindicator") || "true",
+						loadingindicator = getPref("loadingindicator") || "false",
 						tabUrl = tab.url.replace(/#[^\?]+/, ""); // Replace hash for bookmarks since it throws the validator
 
 					if (validatorType === "inline" && (!(/(validator\.nu|validator\.w3\.org)/.test(tabUrl)) && autorun)) { // To avoid inline validation of the W3C validator
@@ -103,6 +103,7 @@
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4) {
 								clearTimeout(timer);
+								//console.log(xhr.getResponseHeader("X-W3C-Validator-Status"));
 								var status = xhr.getResponseHeader("X-W3C-Validator-Status");
 								if (!status || status === "Abort") {
 									sendResults({
@@ -152,26 +153,41 @@
 							
 						xhrInline.onreadystatechange = function () {
 							if (xhrInline.readyState === 4) {
-								var response = xhrInline.responseText;
-								if (/For security reasons, validating resources located at non-public IP addresses has been disabled in this service/i.test/(response)) {
+								var status = xhrInline.getResponseHeader("X-W3C-Validator-Status"),
+									response;
+								if (!status || status === "Abort") {
+									formatBadge("X");
 									chrome.tabs.sendRequest(
 										tab.id, 
 										{
 											results : {
-												"message" : "For security reasons, validating resources located at non-public IP addresses has been disabled in this service - W3C"
+												"message" : "Validation failed. Please retry or wait till<br> W3C allows validation again"
 											}
 										}
 									);
 								}
 								else {
-									formatBadge(xhrInline.getResponseHeader("X-W3C-Validator-Errors"));
-									chrome.tabs.sendRequest(
-										tab.id, 
-										{
-											results : xhrInline.responseText,
-											showErrorList : getPref("errorlist") || "showerrorlistatclick"
-										}
-									);
+									response = xhrInline.responseText;
+									if (/For security reasons, validating resources located at non-public IP addresses has been disabled in this service/i.test/(response)) {
+										chrome.tabs.sendRequest(
+											tab.id, 
+											{
+												results : {
+													"message" : "For security reasons, validating resources located at non-public IP addresses has been disabled in this service - W3C"
+												}
+											}
+										);
+									}
+									else {
+										formatBadge(xhrInline.getResponseHeader("X-W3C-Validator-Errors"));
+										chrome.tabs.sendRequest(
+											tab.id, 
+											{
+												results : xhrInline.responseText,
+												showErrorList : getPref("errorlist") || "showerrorlistatclick"
+											}
+										);
+									}
 								}
 							}	
 						};
