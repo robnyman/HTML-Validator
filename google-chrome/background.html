@@ -6,7 +6,7 @@
 					validate();
 				});
 				
-				chrome.extension.onRequest.addListener(
+				chrome.runtime.onMessage.addListener(
 					function (request, sender, sendResponse) {
 						if (request.validate) {
 							validate(request.validation);
@@ -75,7 +75,7 @@
 							loadingTimer,
 							sendResults = function (result) {
 								clearTimeout(loadingTimer);
-								chrome.tabs.sendRequest(
+								chrome.tabs.sendMessage(
 									tab.id, 
 									{
 										results : result,
@@ -140,7 +140,7 @@
 						xhr.send(null);
 					}
 					else if (validatorType === "validate-local-inline") {
-						chrome.tabs.sendRequest(
+						chrome.tabs.sendMessage(
 							tab.id, 
 							{
 								results : {
@@ -157,7 +157,7 @@
 									response;
 								if (!status || status === "Abort") {
 									formatBadge("X");
-									chrome.tabs.sendRequest(
+									chrome.tabs.sendMessage(
 										tab.id, 
 										{
 											results : {
@@ -169,7 +169,7 @@
 								else {
 									response = xhrInline.responseText;
 									if (/For security reasons, validating resources located at non-public IP addresses has been disabled in this service/i.test/(response)) {
-										chrome.tabs.sendRequest(
+										chrome.tabs.sendMessage(
 											tab.id, 
 											{
 												results : {
@@ -180,7 +180,7 @@
 									}
 									else {
 										formatBadge(xhrInline.getResponseHeader("X-W3C-Validator-Errors"));
-										chrome.tabs.sendRequest(
+										chrome.tabs.sendMessage(
 											tab.id, 
 											{
 												results : xhrInline.responseText,
@@ -201,7 +201,7 @@
 						});
 					}
 					else if (validatorType === "validate-local-html") {
-						chrome.tabs.sendRequest(
+						chrome.tabs.sendMessage(
 							tab.id, 
 							{
 								results : {
@@ -223,7 +223,7 @@
 			
 			sendMessage = function (message) {
 				chrome.tabs.getSelected(null, function (tab) {
-					chrome.tabs.sendRequest(
+					chrome.tabs.sendMessage(
 						tab.id, 
 						{
 							results : {

@@ -41,66 +41,7 @@
 		}
 	</style>
 
-	<!--<script src="js/options.js"></script>-->
-	<script>
-		var htmlvalidatorpopup = function () {
-			var backgroundPage = chrome.extension.getBackgroundPage().htmlvalidatorbackground,
-				
-			init = function () {
-				document.getElementById("inline-validation").onclick = function () {
-					backgroundPage.validate("inline");
-				};
-				document.getElementById("new-tab-validation").onclick = function () {
-					backgroundPage.validate("new-tab");
-				};
-				document.getElementById("validate-local-html").onclick = function () {
-					backgroundPage.validate("validate-local-html");
-				};
-				
-				if (backgroundPage.getPref("iconclick") === "iconvalidate") {
-					backgroundPage.validate();
-				}
-				
-				
-				var errorList = backgroundPage.getPref("errorlist");
-				if (typeof errorList === "undefined" || errorList === "showerrorlistatclick") {
-					backgroundPage.createErrorList();
-				}
-				
-				document.getElementById("showerrorlist").onclick = reloadTab;
-				document.getElementById("noerrorlist").onclick = reloadTab;
-			},
-			
-			hideResultsPresentation = function () {
-				backgroundPage.hideResultsPresentation();
-			},
-			
-			reloadTab = function () {
-				chrome.tabs.getSelected(null, function (tab) {
-					chrome.tabs.update(tab.id, {
-						url : tab.url
-					});
-				});
-			};
-			
-			return {
-				init : init,
-				hideResultsPresentation : hideResultsPresentation
-			};
-		}();
-		window.onload = function () {
-			htmlvalidatorpopup.init();
-			if (typeof htmlvalidatoroptions !== "undefined") {
-				htmlvalidatoroptions.init();
-			}	
-		};
-		
-		document.onkeydown = function (evt) {
-			if (evt.keyCode === 27) {
-				htmlvalidatorpopup.hideResultsPresentation();
-			}
-		};
-	</script>
+	<script src="js/popup.js"></script>
 	
 </head>
 <body>
@@ -109,47 +50,6 @@
 		<a href="#" id="inline-validation">Validate inline</a>
 		<a href="#" id="new-tab-validation">W3C validator <br>(Ctrl/Cmd + Shift + V)</a>
 		<a href="#" id="validate-local-html">Validate local HTML <br>(Ctrl/Cmd + Shift + A)</a>
-		
-		<!-- <h1>Options</h1>
-				<h2>Autorun</h2>
-				<p>
-					<input type="checkbox" id="autorun">
-					<label for="autorun">Autorun</label>
-				</p>
-				
-				<h2>Validation Type</h2>
-				<p>
-					<input type="radio" id="inline" name="validator" value="inline">
-					<label for="inline">Inline in page</label><br>
-					<input type="radio" id="new-tab" name="validator" value="new-tab">
-					<label for="new-tab">W3C validator</label>
-				</p>
-				
-				<h2>Show error list</h2>
-				<p>
-					<input type="radio" id="showerrorlist" name="errorlist" value="showerrorlist">
-					<label for="showerrorlist">Yes</label><br>
-					<input type="radio" id="noerrorlist" name="errorlist" value="noerrorlist">
-					<label for="noerrorlist">No</label><br>
-					<input type="radio" id="showerrorlistatclick" name="errorlist" value="showerrorlistatclick">
-					<label for="showerrorlistatclick">At icon click</label>
-				</p>
-				
-				<h2>Validate at icon-click</h2>
-				<p>
-					<input type="radio" id="iconvalidate" name="iconclick" value="iconvalidate">
-					<label for="iconvalidate">Yes</label>
-					<input type="radio" id="icondontvalidate" name="iconclick" value="icondontvalidate">
-					<label for="icondontvalidate">No</label>
-				</p>
-				
-				<h2>For inline validation</h2>
-				<p>
-					<input type="checkbox" id="usetimeout">
-					<label for="usetimeout">Use timeout</label><br>
-					<input type="checkbox" id="loadingindicator">
-					<label for="loadingindicator">Loading indicator</label>
-				</p> -->
 	</div>
 	
 		

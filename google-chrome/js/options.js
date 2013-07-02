@@ -9,7 +9,7 @@ var htmlvalidatoroptions = function () {
 		defaults = {
 			autorun : "true",
 			validator : "inline",
-			errorlist : "showerrorlistatclick",
+			errorlist : "showerrorlist",
 			iconclick : "icondontvalidate",
 			usetimeout : "true",
 			loadingindicator : "false"

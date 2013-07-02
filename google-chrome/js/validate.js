@@ -10,13 +10,13 @@ var htmlvalidator = function () {
 		errorLength,
 	
 	init = function () {
-		chrome.extension.sendRequest({
+		chrome.runtime.sendMessage({
 				setBadgeValues : true,
 				errors : ""
 			}
 		);
 		
-		chrome.extension.sendRequest({
+		chrome.runtime.sendMessage({
 				autoruncheck : true
 			}
 		);
@@ -39,7 +39,7 @@ var htmlvalidator = function () {
 			}
 		});
 			
-		chrome.extension.onRequest.addListener(receiveRequest);
+		chrome.runtime.onMessage.addListener(receiveRequest);
 		
 		if (!(/acid3.acidtests.org|\.(png|gif|jpe?g)$/.test(location.href))) {
 			// Insert CSS manually to avoid the invalid code Google Chrome uses to do it
@@ -83,7 +83,7 @@ var htmlvalidator = function () {
 	},
 
 	validate = function (validation) {
-		chrome.extension.sendRequest({
+		chrome.runtime.sendMessage({
 				validate : true,
 				validation : validation || "inline"
 			}
@@ -124,7 +124,7 @@ var htmlvalidator = function () {
 	receiveRequest = function (request, sender, sendResponse) {
 		var requestResults = request.results,
 			showFailedValidation = function () {
-				chrome.extension.sendRequest({
+				chrome.runtime.sendMessage({
 						setBadgeValues : true,
 						errors : "X"
 					}
@@ -162,7 +162,7 @@ var htmlvalidator = function () {
 					// If the result is finished, send complete page HTML code to W3C validator
 					xhr.onreadystatechange = function () {
 						if (xhr.readyState === 4) {
-							chrome.extension.sendRequest({
+							chrome.runtime.sendMessage({
 								validateLocal : true,
 								html : xhr.responseText
 							});	
@@ -174,7 +174,7 @@ var htmlvalidator = function () {
 					xhr.send(null);
 				}
 				else {
-					chrome.extension.sendRequest({
+					chrome.runtime.sendMessage({
 						openNewTabForForm : true,
 						url : location.href
 					});
@@ -214,7 +214,7 @@ var htmlvalidator = function () {
 					});
 				}
 				else if (message.type === "non-document-error" && message.message.indexOf("HTTP resource not retrievable") !== -1) {
-					chrome.extension.sendRequest({
+					chrome.runtime.sendMessage({
 							setBadgeValues : true,
 							errors : "X"
 						}
